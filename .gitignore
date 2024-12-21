@@ -1,2 +1,5 @@
 mynotes.md
 frontend/node_modules/
+manual-tests/
+testing/
+backend/.env

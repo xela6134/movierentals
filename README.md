@@ -27,3 +27,27 @@ The application is built using:
 - Python (>= 3.13)
 - Node.js (>= 19.0)
 - MySQL
+
+## Database Structure
+
+The database schema is structured as below - 
+
+1. `movies`: **Database for movies**
+    - `id`: Primary key
+    - `title`: Title of the movie
+    - `director`: Director of the movie
+    - `released`: Release year of the movie
+2. `users`: **Database for users**
+    - `id`: Primary key
+    - `name`: Name of the user
+    - `age`: Age of the user
+3. `borrowed`: **Movies that have been already borrowed**
+    - `m_id`: ID of movie. References `movies(id)`
+    - `u_id`: ID of user. References `users(id)`
+    - `rating`: Rating after borrowing
+4. `borrowing`: **Movies currently being borrowed**
+    - `m_id`: ID of movie. References `movies(id)`
+    - `u_id`: ID of user. References `users(id)`
+5. `genres`: **Maps genres to movies**
+    - `id`: ID of movie. References `movies(id)`
+    - `genre`: Genre of the movie, in text.
