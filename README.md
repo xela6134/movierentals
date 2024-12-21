@@ -26,7 +26,24 @@ The application is built using:
 
 - Python (>= 3.13)
 - Node.js (>= 19.0)
-- MySQL
+
+### Backend Setup
+
+Navigate to the home directory of this project.
+
+1. `cd backend`
+2. `pip3 install -r requirements.txt`
+3. `python3 app.py`
+
+This will run the backend server. This must be ran before starting the frontend.
+
+### Frontend Setup
+
+Similarly, navigate to the home directory of this project.
+
+1. `cd frontend`
+2. `npm install`
+3. `npm run dev`
 
 ## Database Structure
 

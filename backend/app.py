@@ -1,7 +1,8 @@
-from dotenv import load_dotenv      # type: ignore
-from flask import Flask, jsonify    # type: ignore
+from dotenv import load_dotenv              # type: ignore
+from flask import Flask, jsonify, request   # type: ignore
+from flask_cors import CORS                 # type: ignore
 import os
-import mysql.connector              # type: ignore
+import mysql.connector                      # type: ignore
 
 load_dotenv()
 
@@ -14,12 +15,14 @@ config = {
 }
 
 app = Flask(__name__)
+CORS(app)
 
 def get_db_connection():
     return mysql.connector.connect(**config)
 
 @app.route('/api/movies', methods=['GET'])
 def get_movies():
+    print(f"API '/api/movies' called from {request.remote_addr}")
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -29,6 +32,7 @@ def get_movies():
 
     cursor.close()
     conn.close()
+    print(movies)
     return jsonify(movies)
 
 @app.route('/api/users', methods=['GET'])
