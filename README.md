@@ -69,7 +69,7 @@ The database schema is structured as below -
     - `m_id`: ID of movie. References `movies(id)`
     - `u_id`: ID of user. References `users(id)`
     - `rating`: Rating after borrowing
-    - `text`: Text of the review
+    - `review`: Text of the review
 4. `reservations`: **DVDs currently being borrowed**
     - `m_id`: ID of movie. References `movies(id)`
     - `u_id`: ID of user. References `users(id)`

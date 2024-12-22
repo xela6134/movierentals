@@ -1,6 +1,8 @@
 from dotenv import load_dotenv
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_bcrypt import Bcrypt
+from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 import os
 import mysql.connector
 
@@ -15,7 +17,14 @@ config = {
 }
 
 app = Flask(__name__)
-CORS(app)
+
+bcrypt = Bcrypt(app)
+jwt = JWTManager(app)
+
+app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
+app.config['JWT_ACCESS_TOKEN_EXPIRES'] = int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES'))
+
+CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 def get_db_connection():
     return mysql.connector.connect(**config)
