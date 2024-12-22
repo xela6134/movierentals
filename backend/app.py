@@ -1,8 +1,8 @@
-from dotenv import load_dotenv              # type: ignore
-from flask import Flask, jsonify, request   # type: ignore
-from flask_cors import CORS                 # type: ignore
+from dotenv import load_dotenv
+from flask import Flask, jsonify, request
+from flask_cors import CORS
 import os
-import mysql.connector                      # type: ignore
+import mysql.connector
 
 load_dotenv()
 

@@ -1,8 +1,8 @@
-# Fullstack Movie Rental System
+# Fullstack Movie DVD Rental System
 
 ## Overview
 
-This project is a fullstack movie rental system designed to allow users to sign up/log in, borrow movies, return them, write reviews, and receive movie recommendations based on their preferences and current popularity.
+This project is a fullstack movie rental system designed to allow users to sign up/log in, borrow movie DVDs, return them, write reviews, and receive movie recommendations based on their preferences and current popularity.
 
 The application is built using:
 
@@ -13,7 +13,7 @@ The application is built using:
 
 1. **User Authentication**
    - Sign up / Log in functionality with secure password storage.
-2. **Movie Borrowing and Returning**
+2. **DVD Borrowing and Returning**
    - Users can browse the movie catalog, borrow movies, and return them after use.
 3. **Review System**
    - Users can leave reviews and ratings for the movies they watch.
@@ -21,6 +21,8 @@ The application is built using:
    - Personalized movie recommendations based on user preferences and trending/popular movies.
 
 ## Installation and Setup
+
+**WARNING**: Just a heads up this file will not run because I have intentionally left out the .env files for now
 
 ### Prerequisites
 
@@ -54,17 +56,27 @@ The database schema is structured as below -
     - `title`: Title of the movie
     - `director`: Director of the movie
     - `released`: Release year of the movie
+    - `copies`: Indicates how many copies of each DVD there is
 2. `users`: **Database for users**
     - `id`: Primary key
+    - `user_id`: ID of the user, used when logging in
+    - `password`: Password of the user. Obviously hashed
     - `name`: Name of the user
     - `age`: Age of the user
-3. `borrowed`: **Movies that have been already borrowed**
+    - `is_admin`: Checks if user is the admin
+    - `suspended`: Indicates if user has been suspended
+3. `reviews`: **Reviews for users after borrowing DVD**
     - `m_id`: ID of movie. References `movies(id)`
     - `u_id`: ID of user. References `users(id)`
     - `rating`: Rating after borrowing
-4. `borrowing`: **Movies currently being borrowed**
+    - `text`: Text of the review
+4. `reservations`: **DVDs currently being borrowed**
     - `m_id`: ID of movie. References `movies(id)`
     - `u_id`: ID of user. References `users(id)`
+    - `reservation_date`: Date when reservation was made
 5. `genres`: **Maps genres to movies**
     - `id`: ID of movie. References `movies(id)`
     - `genre`: Genre of the movie, in text.
+6. `movie_posters`: **Official Images of Movies**
+    - `id`: ID of movie. References `movies(id)`
+    - `img`: Link of the image
