@@ -36,14 +36,6 @@ body {
   background-color: #141414;
 }
 
-.default-red {
-  color: #e50914;
-}
-
-.default-link-color {
-  color: white;
-}
-
-.default-link-color:hover {
-  color: #e50914;
+.secondary-background {
+  background-color: #595959;
 }
