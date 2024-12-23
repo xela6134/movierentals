@@ -27,7 +27,7 @@ export default function Register() {
       setError("Name is blank!");
       return false;
     }
-    if (age.trim() === '' || isNaN(age) || age <= 0 || age > 120) {
+    if (age === '' || isNaN(age) || age <= 0 || age > 120) {
       setError("Age must be a valid number between 1 and 120!");
       return false;
     }
@@ -56,7 +56,7 @@ export default function Register() {
       age: age,
     };
 
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/register`, payload)
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, payload)
       .then((response) => {
         console.log('Registration successful:', response.data);
         setSuccess('Registration successful! Redirecting to login...');
@@ -110,7 +110,7 @@ export default function Register() {
             <label htmlFor="confirmPassword" className="block text-white mb-2">Confirm Password</label>
             <input
               type="password"
-              id="password"
+              id="confirmPassword"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -137,7 +137,8 @@ export default function Register() {
               onChange={(e) => setAge(e.target.value)}
               required
               className="w-full p-2 rounded focus:outline-none"
-              min="0"
+              min="1"
+              max="120"
             />
           </div>
           <button

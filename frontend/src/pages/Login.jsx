@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '@/components/AuthContext';
 
 export default function Login() {
   const navigate = useNavigate();
+  const { setAuth } = useContext(AuthContext);
 
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
@@ -11,7 +13,6 @@ export default function Login() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Form submission
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -23,15 +24,27 @@ export default function Login() {
       password: password,
     };
 
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/login`, payload)
+    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, payload, { withCredentials: true })
       .then((response) => {
         console.log('Login successful:', response.data);
         setSuccess('Login successful! Redirecting...');
-        
-        // TODO: Handle token storage here (e.g., store in cookies or localStorage)
-        // For example, if the backend sends a token in the response:
-        // const { token } = response.data;
-        // localStorage.setItem('token', token);
+
+        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/status`, { withCredentials: true })
+          .then((res) => {
+            setAuth({
+              isAuthenticated: res.data.authenticated,
+              user: res.data.user,
+              loading: false,
+            });
+          })
+          .catch((err) => {
+            console.error('Auth status error:', err.response);
+            setAuth({
+              isAuthenticated: false,
+              user: null,
+              loading: false,
+            });
+          });
 
         setTimeout(() => {
           navigate('/');
@@ -42,7 +55,7 @@ export default function Login() {
         if (error.response && error.response.data && error.response.data.msg) {
           setError(error.response.data.msg);
         } else {
-          setError('Error occurred.');
+          setError('An error occurred during login. Please try again.');
         }
       });
   };
