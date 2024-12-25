@@ -1,9 +1,12 @@
+// app/register/page.jsx
+'use client';
+
 import React, { useState } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 
 export default function Register() {
-  const navigate = useNavigate();
+  const router = useRouter();
 
   const [userId, setUserId] = useState('');
   const [password, setPassword] = useState('');
@@ -25,6 +28,10 @@ export default function Register() {
     }
     if (name.trim() === '') {
       setError("Name is blank!");
+      return false;
+    }
+    if (name.length() > 20) {
+      setError("Your name is too long.");
       return false;
     }
     if (age === '' || isNaN(age) || age <= 0 || age > 120) {
@@ -62,7 +69,7 @@ export default function Register() {
         setSuccess('Registration successful! Redirecting to login...');
         
         setTimeout(() => {
-          navigate('/login');
+          router.push('/');
         }, 1500);
       })
       .catch((error) => {
@@ -77,7 +84,7 @@ export default function Register() {
   };
 
   return (
-    <div className="h-[calc(100vh-80px)] flex items-center justify-center default-background">
+    <div className="h-screen flex items-center justify-center default-background">
       <div className="rounded-lg secondary-background p-16">
         <h1 className="text-3xl text-center font-kanit text-red-600 mb-6">REGISTER</h1>
         {/* Display success or error message */}

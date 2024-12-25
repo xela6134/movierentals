@@ -1,3 +1,6 @@
+// componenets/AuthContext.jsx
+'use client';
+
 import React, { createContext, useState, useEffect } from 'react';
 import axios from 'axios';
 

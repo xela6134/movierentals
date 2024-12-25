@@ -1,10 +1,13 @@
+// app/login/page.jsx
+'use client';
+
 import React, { useState, useContext } from 'react';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
+import { useRouter } from 'next/navigation';
 import { AuthContext } from '@/components/AuthContext';
 
 export default function Login() {
-  const navigate = useNavigate();
+  const router = useRouter();
   const { setAuth } = useContext(AuthContext);
 
   const [userId, setUserId] = useState('');
@@ -47,7 +50,7 @@ export default function Login() {
           });
 
         setTimeout(() => {
-          navigate('/');
+          router.push('/');
         }, 1500);
       })
       .catch((error) => {
@@ -61,7 +64,7 @@ export default function Login() {
   };
 
   return (
-    <div className="h-[calc(100vh-80px)] flex items-center justify-center default-background">
+    <div className="h-screen flex items-center justify-center default-background">
       <div className="rounded-lg secondary-background p-16">
         <h1 className="text-3xl text-center font-kanit text-red-600 mb-6">LOGIN</h1>
         {/* Display success or error message */}
