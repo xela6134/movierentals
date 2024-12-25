@@ -64,7 +64,7 @@ export default function Login() {
   };
 
   return (
-    <div className="h-screen flex items-center justify-center default-background">
+    <div className="min-h-screen flex items-center justify-center default-background">
       <div className="rounded-lg secondary-background p-16">
         <h1 className="text-3xl text-center font-kanit text-red-600 mb-6">LOGIN</h1>
         {/* Display success or error message */}

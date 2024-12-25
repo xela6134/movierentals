@@ -22,6 +22,20 @@ body {
   font-family: 'Noto Sans', Arial, Helvetica, sans-serif;
 }
 
+body::-webkit-scrollbar {
+  width: 0.6rem;
+  background-color: #141414;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: #dc2626;
+  border-radius: 0.2rem;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background-color: #7f1d1d;
+}
+
 /* Fonts */
 .font-bebas {
   font-family: 'Bebas Neue', cursive;
