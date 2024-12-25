@@ -27,10 +27,6 @@ export default function Register() {
       setError("Name is blank!");
       return false;
     }
-    if (name.length() > 20) {
-      setError("Your name is too long.");
-      return false;
-    }
     if (age === '' || isNaN(age) || age <= 0 || age > 120) {
       setError("Age must be a valid number between 1 and 120!");
       return false;

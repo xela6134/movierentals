@@ -16,7 +16,8 @@ export default function NavBar() {
           user: null,
           loading: false,
         });
-        navigate('/');  // Navigate to homepage after logging out
+        // Navigate to homepage after logging out
+        navigate('/');
       })
       .catch((error) => {
         console.error('Logout error:', error.response);
