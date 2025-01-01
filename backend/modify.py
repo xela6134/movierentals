@@ -1,0 +1,126 @@
+# Database modification file
+
+from dotenv import load_dotenv
+import pandas
+import mysql.connector
+import os
+
+load_dotenv()
+
+config = {
+    'user': os.getenv('DB_USER'),
+    'password': os.getenv('DB_PASSWORD'),
+    'host': os.getenv('DB_HOST'),
+    'port': int(os.getenv('DB_PORT')),
+    'database': os.getenv('DB_NAME')
+}
+
+add_movies_query = """
+insert into movies
+(id, title, director, released, copies)
+values (%s, %s, %s, %s, %s)
+"""
+
+add_users_query = """
+insert into users
+(id, name, age, user_id, is_admin, suspended, password)
+values (%s, %s, %s, %s, %s, %s, %s)
+"""
+
+add_reviews_query = """
+insert into reviews
+(m_id, u_id, rating, review)
+values (%s, %s, %s, %s)
+"""
+
+add_genres_query = """
+insert into genres
+(id, genre)
+values (%s, %s)
+"""
+
+def get_db_connection():
+    return mysql.connector.connect(**config)
+
+def main():
+    movies_data = pandas.read_csv('admin/movies.csv')
+    movies_tuples = list(movies_data.itertuples(index=False, name=None))
+    
+    users_data = pandas.read_csv('admin/users.csv')
+    users_tuples = list(users_data.itertuples(index=False, name=None))
+    
+    reviews_data = pandas.read_csv('admin/new_reviews.csv')
+    reviews_tuples = list(reviews_data.itertuples(index=False, name=None))
+    
+    print(reviews_data.isnull().sum())
+
+    genres_data = pandas.read_csv('admin/genres.csv')
+    genres_tuples = list(genres_data.itertuples(index=False, name=None))
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.execute('delete from users')
+        conn.commit()
+    except mysql.connector.Error as err:
+        print(f"delete from users error: {err}")
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.executemany(add_movies_query, movies_tuples)
+        conn.commit()
+    except mysql.connector.Error as err:
+        print(f"add movies error: {err}")
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        cursor.executemany(add_users_query, users_tuples)
+        conn.commit()
+    except mysql.connector.Error as err:
+        print(f"add users error: {err}")
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.executemany(add_reviews_query, reviews_tuples)
+        conn.commit()
+    except mysql.connector.Error as err:
+        print(f"add reviews error: {err}")
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+    
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+
+        cursor.executemany(add_genres_query, genres_tuples)
+        conn.commit()
+    except mysql.connector.Error as err:
+        print(f"add genres error: {err}")
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
+
+if __name__ == '__main__':
+    main()
