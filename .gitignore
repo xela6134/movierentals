@@ -3,3 +3,5 @@ frontend/node_modules/
 manual-tests/
 testing/
 backend/.env
+backend/admin/modify_users.py
+backend/admin/modify_reviews.py
