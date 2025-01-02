@@ -50,12 +50,17 @@ export default function NavBar() {
         )}
 
         {!auth.loading && auth.isAuthenticated && (
-          <button
-            onClick={handleLogout}
-            className="text-white hover:text-red-600 focus:outline-none"
-          >
-            Logout
-          </button>
+          <>
+            <Link href="/movies" className="text-white hover:text-red-600">
+              Movies
+            </Link>
+            <button
+              onClick={handleLogout}
+              className="text-white hover:text-red-600 focus:outline-none"
+            >
+              Logout
+            </button>
+          </>
         )}
       </div>
     </nav>

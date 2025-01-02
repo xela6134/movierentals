@@ -22,7 +22,6 @@ def get_db_connection():
 @movies_bp.route('/movies', methods=['GET'])
 @jwt_required()
 def get_movies():
-    print(f"API '/api/movies' called from {request.remote_addr}")
     conn = get_db_connection()
     cursor = conn.cursor(dictionary=True)
 
@@ -32,5 +31,22 @@ def get_movies():
 
     cursor.close()
     conn.close()
-    print(movies)
     return jsonify(movies)
+
+@movies_bp.route('/movie_posters', methods=['GET'])
+@jwt_required()
+def get_movie_posters():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+
+    query = "select * from movie_posters"
+    cursor.execute(query)
+    movies = cursor.fetchall()
+    
+    for row in movies:
+        print(row)
+
+    cursor.close()
+    conn.close()
+    return jsonify(movies)
+

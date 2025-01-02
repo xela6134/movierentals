@@ -68,17 +68,12 @@ def main():
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-        
-        cursor.execute('select * from movie_posters')
-        result = cursor.fetchall()
-        for row in result:
-            print(row)
-            
-        # cursor.execute('alter table movie_posters modify column img varchar(255) null')
-        # conn.commit()
 
-        # cursor.executemany(add_posters_query, posters_tuples)
-        # conn.commit()
+        cursor.execute('delete from movie_posters')
+        conn.commit()
+
+        cursor.executemany(add_posters_query, posters_tuples)
+        conn.commit()
     except mysql.connector.Error as err:
         print(f"add posters error: {err}")
         conn.rollback()
