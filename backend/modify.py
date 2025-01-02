@@ -39,6 +39,12 @@ insert into genres
 values (%s, %s)
 """
 
+add_posters_query = """
+insert into movie_posters
+(id, img)
+values (%s, %s)
+"""
+
 def get_db_connection():
     return mysql.connector.connect(**config)
 
@@ -49,78 +55,88 @@ def main():
     users_data = pandas.read_csv('admin/users.csv')
     users_tuples = list(users_data.itertuples(index=False, name=None))
     
-    reviews_data = pandas.read_csv('admin/new_reviews.csv')
+    reviews_data = pandas.read_csv('admin/reviews.csv')
     reviews_tuples = list(reviews_data.itertuples(index=False, name=None))
-    
-    print(reviews_data.isnull().sum())
 
     genres_data = pandas.read_csv('admin/genres.csv')
     genres_tuples = list(genres_data.itertuples(index=False, name=None))
     
+    posters_data = pandas.read_csv('admin/posters.csv')
+    posters_data = posters_data.where(pandas.notnull(posters_data), None)
+    posters_tuples = list(posters_data.itertuples(index=False, name=None))
+
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
         
-        cursor.execute('delete from users')
-        conn.commit()
+        cursor.execute('select * from movie_posters')
+        result = cursor.fetchall()
+        for row in result:
+            print(row)
+            
+        # cursor.execute('alter table movie_posters modify column img varchar(255) null')
+        # conn.commit()
+
+        # cursor.executemany(add_posters_query, posters_tuples)
+        # conn.commit()
     except mysql.connector.Error as err:
-        print(f"delete from users error: {err}")
+        print(f"add posters error: {err}")
         conn.rollback()
     finally:
         cursor.close()
         conn.close()
     
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    # try:
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
         
-        cursor.executemany(add_movies_query, movies_tuples)
-        conn.commit()
-    except mysql.connector.Error as err:
-        print(f"add movies error: {err}")
-        conn.rollback()
-    finally:
-        cursor.close()
-        conn.close()
+    #     cursor.executemany(add_movies_query, movies_tuples)
+    #     conn.commit()
+    # except mysql.connector.Error as err:
+    #     print(f"add movies error: {err}")
+    #     conn.rollback()
+    # finally:
+    #     cursor.close()
+    #     conn.close()
     
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    # try:
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
         
-        cursor.executemany(add_users_query, users_tuples)
-        conn.commit()
-    except mysql.connector.Error as err:
-        print(f"add users error: {err}")
-        conn.rollback()
-    finally:
-        cursor.close()
-        conn.close()
+    #     cursor.executemany(add_users_query, users_tuples)
+    #     conn.commit()
+    # except mysql.connector.Error as err:
+    #     print(f"add users error: {err}")
+    #     conn.rollback()
+    # finally:
+    #     cursor.close()
+    #     conn.close()
 
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    # try:
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
 
-        cursor.executemany(add_reviews_query, reviews_tuples)
-        conn.commit()
-    except mysql.connector.Error as err:
-        print(f"add reviews error: {err}")
-        conn.rollback()
-    finally:
-        cursor.close()
-        conn.close()
+    #     cursor.executemany(add_reviews_query, reviews_tuples)
+    #     conn.commit()
+    # except mysql.connector.Error as err:
+    #     print(f"add reviews error: {err}")
+    #     conn.rollback()
+    # finally:
+    #     cursor.close()
+    #     conn.close()
     
-    try:
-        conn = get_db_connection()
-        cursor = conn.cursor()
+    # try:
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
 
-        cursor.executemany(add_genres_query, genres_tuples)
-        conn.commit()
-    except mysql.connector.Error as err:
-        print(f"add genres error: {err}")
-        conn.rollback()
-    finally:
-        cursor.close()
-        conn.close()
+    #     cursor.executemany(add_genres_query, genres_tuples)
+    #     conn.commit()
+    # except mysql.connector.Error as err:
+    #     print(f"add genres error: {err}")
+    #     conn.rollback()
+    # finally:
+    #     cursor.close()
+    #     conn.close()
 
 if __name__ == '__main__':
     main()

@@ -33,7 +33,7 @@ def get_users():
     conn.close()
     return jsonify(users)
 
-@users_bp.route('/users/username', methods=['GET'])
+@users_bp.route('/users/current', methods=['GET'])
 @jwt_required()
 def get_username():
     current_user_id = get_jwt_identity()
