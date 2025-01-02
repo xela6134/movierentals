@@ -2,12 +2,13 @@
 'use client';
 
 import React, { useContext, useEffect, useState, useMemo } from 'react'
+import Link from 'next/link';
 import { AuthContext } from '@/components/AuthContext';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 export default function Movies() {
-  const { auth, setAuth } = useContext(AuthContext);
+  const { auth } = useContext(AuthContext);
   const router = useRouter();
   const [movies, setMovies] = useState([]);
   const [posters, setPosters] = useState([]);
@@ -76,20 +77,14 @@ export default function Movies() {
                       src={posterUrl}
                       alt={`${movie.title} Poster`}
                       className="w-full h-60 object-cover mb-4 rounded"
-                      onError={(e) => {
-                        e.target.onerror = null; // Prevent infinite loop if default image also fails
-                        e.target.src = '/path-to-your-default-placeholder.png';
-                      }}
                     />
                   ) : (
                     <img
-                      src="/src/default.jpg"
+                      src="/images/default.jpg"
                       alt="No Image Available"
                       className="w-full h-60 object-cover mb-4 rounded opacity-50"
                     />
                   )}
-
-                  {/* Movie Details */}
                   <h2 className="text-xl font-bold mb-2 text-center">{movie.title}</h2>
                   <p>
                     <strong>Director:</strong> {movie.director}
@@ -100,6 +95,14 @@ export default function Movies() {
                   <p>
                     <strong>Copies:</strong> {movie.copies}
                   </p>
+                  <Link 
+                    href={`/movies/${movie.id}`} 
+                    className="text-red-600 font-bold mt-3 cursor-pointer"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    More Information
+                  </Link>
                 </div>
               );
             })}
