@@ -6,7 +6,7 @@ def get_poster(title, year, id):
     params = {
         't': title,
         'y': year,
-        'apikey': '3b0133ff'
+        'apikey': '3b0133ff' # who cares about this api key lol
     }
     response = requests.get(link, params=params)
     data = response.json()
