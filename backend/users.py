@@ -22,16 +22,21 @@ def get_db_connection():
 @users_bp.route('/users', methods=['GET'])
 @jwt_required()
 def get_users():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
 
-    query = "select * from users"
-    cursor.execute(query)
-    users = cursor.fetchall()
+        query = "select * from users"
+        cursor.execute(query)
+        users = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
-    return jsonify(users)
+        return jsonify(users)
+    except Exception as e:
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal server error."}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 @users_bp.route('/users/current', methods=['GET'])
 @jwt_required()

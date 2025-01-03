@@ -22,31 +22,78 @@ def get_db_connection():
 @movies_bp.route('/movies', methods=['GET'])
 @jwt_required()
 def get_movies():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
 
-    query = "select * from movies"
-    cursor.execute(query)
-    movies = cursor.fetchall()
+        query = "select * from movies"
+        cursor.execute(query)
+        movies = cursor.fetchall()
 
-    cursor.close()
-    conn.close()
-    return jsonify(movies)
+        return jsonify(movies), 200
+    except Exception as e:
+        return jsonify({"msg": f"Internal server error: {e}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 @movies_bp.route('/movie_posters', methods=['GET'])
 @jwt_required()
 def get_movie_posters():
-    conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
 
-    query = "select * from movie_posters"
-    cursor.execute(query)
-    movies = cursor.fetchall()
-    
-    for row in movies:
-        print(row)
+        query = "select * from movie_posters"
+        cursor.execute(query)
+        movies = cursor.fetchall()
+        
+        for row in movies:
+            print(row)
 
-    cursor.close()
-    conn.close()
-    return jsonify(movies)
+        return jsonify(movies), 200
+    except Exception as e:
+        return jsonify({"msg": f"Internal server error: {e}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
+@movies_bp.route('/movies/<int:id>', methods=['GET'])
+@jwt_required()
+def get_movie_by_id(id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("select * from movies where id = %s", (id,))
+        movie = cursor.fetchone()
+        
+        if movie:
+            return jsonify(movie), 200
+        else:
+            return jsonify({"msg": f"Movie with id {id} not found."}), 404
+    except Exception as e:
+        return jsonify({"msg": f"Internal server error: {e}"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@movies_bp.route('/movie_posters/<int:id>', methods=['GET'])
+@jwt_required()
+def get_movie_poster_by_id(id):
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("select * from movie_posters where id = %s", (id,))
+        movie = cursor.fetchone()
+        
+        if movie:
+            return jsonify(movie), 200
+        else:
+            return jsonify({"msg": f"Movie poster with id {id} not found."}), 404
+    except Exception as e:
+        return jsonify({"msg": f"Internal server error: {e}"}), 500
+    finally:
+        cursor.close()
+        conn.close()

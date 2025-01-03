@@ -68,8 +68,8 @@ def register():
         conn.commit()
 
         return jsonify({"msg": "Registration successful."}), 201
-    except mysql.connector.Error as err:
-        print(f"Database error: {err}")
+    except Exception as e:
+        print(f"Exception caught: {e}")
         return jsonify({"msg": "Internal server error."}), 500
 
     finally:
@@ -91,7 +91,7 @@ def login():
         cursor = conn.cursor(dictionary=True)
 
         # Retrieve user by user_id
-        cursor.execute("select * from users WHERE user_id = %s", (user_id,))
+        cursor.execute("select * from users where user_id = %s", (user_id,))
         user = cursor.fetchone()
 
         if not user:
@@ -114,11 +114,9 @@ def login():
         )
 
         return response, 200
-
-    except mysql.connector.Error as err:
-        print(f"Database error: {err}")
+    except Exception as e:
+        print(f"Exception: {e}")
         return jsonify({"msg": "Internal server error."}), 500
-
     finally:
         cursor.close()
         conn.close()
@@ -133,11 +131,12 @@ def auth_status():
         cursor = conn.cursor(dictionary=True)
         cursor.execute("select user_id, name, age from users where id = %s", (current_user_id,))
         user = cursor.fetchone()
+        
         if not user:
             return jsonify({"authenticated": False, "msg": "User not found."}), 404
         return jsonify({"authenticated": True, "user": user}), 200
-    except mysql.connector.Error as err:
-        print(f"Database error: {err}")
+    except Exception as e:
+        print(f"Exception caught: {e}")
         return jsonify({"authenticated": False, "msg": "Internal server error."}), 500
     finally:
         cursor.close()
