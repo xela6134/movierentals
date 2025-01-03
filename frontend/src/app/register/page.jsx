@@ -42,7 +42,7 @@ export default function Register() {
       setError("Name is blank!");
       return false;
     }
-    if (name.length() > 20) {
+    if (name.length > 20) {
       setError("Your name is too long.");
       return false;
     }

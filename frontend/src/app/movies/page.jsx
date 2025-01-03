@@ -121,24 +121,25 @@ export default function Movies() {
 
   return (
     <div className="min-h-screen flex items-center justify-start flex-col default-background text-white">
-      <h1 className="text-center text-3xl my-8">Movies</h1>
       {!auth.loading && auth.isAuthenticated && (
         <>
           {error && <div className="mb-4 max-w-[208px] text-red-400">{error}</div>}
-          <div className="flex justify-end items-center w-full max-w-5xl px-4 mb-4">
-            <label htmlFor="sort" className="mr-2 font-semibold">Sort By:</label>
-            <select
-              id="sort"
-              value={sortOption}
-              onChange={(e) => setSortOption(e.target.value)}
-              className="bg-gray-700 text-white p-2 rounded"
-            >
-              <option value="id">ID (Default)</option>
-              <option value="reviews">Number of Reviews</option>
-              <option value="rating">Average Rating</option>
-            </select>
-          </div>
-          
+          <div className="flex justify-between items-center w-full px-32 my-4">
+            <div className="text-4xl">Movies</div>
+            <div className="flex items-center">
+              <label htmlFor="sort" className="mr-2 font-semibold">Sort By:</label>
+              <select
+                id="sort"
+                value={sortOption}
+                onChange={(e) => setSortOption(e.target.value)}
+                className="bg-gray-700 text-white p-2 rounded"
+              >
+                <option value="id">ID (Default)</option>
+                <option value="reviews">Number of Reviews</option>
+                <option value="rating">Average Rating</option>
+              </select>
+            </div>
+          </div>          
           <div className="flex flex-wrap justify-center m-8 gap-4">
             {sortedMovies.map((movie) => {
               const posterUrl = posterLookup[movie.id];

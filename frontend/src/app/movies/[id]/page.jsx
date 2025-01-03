@@ -10,6 +10,12 @@ export default function MovieDetail() {
   const { auth, setAuth } = useContext(AuthContext);
   const router = useRouter();
   const params = useParams();
+
+  const [movie, setMovie] = useState({});
+  const [poster, setPoster] = useState();
+  const [reviews, setReviews] = useState([]);
+  const [users, setUsers] = useState([]);
+
   const movieId = params.id;
 
   useEffect(() => {
@@ -18,17 +24,154 @@ export default function MovieDetail() {
         setTimeout(() => {
           router.push('/');
         }, 1500);
+      } else {
+        fetchMovie();
+        fetchPoster();
+        fetchReviews();
+        fetchUsers();
       }
     }
-  }, [auth.loading, auth.isAuthenticated, router])
+  }, [auth.loading, auth.isAuthenticated, router]);
+
+  // Fetches info about current movie
+  const fetchMovie = () => {
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/movies/${movieId}`, { withCredentials: true })
+      .then((response) => {
+        const data = response.data;
+        setMovie(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+  };
+
+  // Fetches poster about current movie
+  const fetchPoster = () => {
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/movie_posters/${movieId}`, { withCredentials: true })
+      .then((response) => {
+        const data = response.data;
+        setPoster(data.img);
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+  };
+
+  // Fetches reviews about current movie
+  const fetchReviews = () => {
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/reviews/movie/${movieId}`, { withCredentials: true })
+      .then((response) => {
+        const data = response.data;
+        setReviews(data);
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+  };
+
+  // Fetches all users
+  const fetchUsers = () => {
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`, { withCredentials: true })
+      .then((response) => {
+        const data = response.data;
+        setUsers(data);
+        console.log(data);
+      })
+      .catch((error) => {
+        console.error(error);
+      })
+  }
+
+  const fetchDetails = () => {
+
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-start flex-col default-background text-white">
+    <div className="flex items-center w-full justify-start flex-col default-background text-white">
       {!auth.loading && !auth.isAuthenticated && (
         <div>Not allowed to view movie. Redirecting to home page...</div>
       )}
       {!auth.loading && auth.isAuthenticated && (
-        <div className="text-center text-3xl text-white">Movie for id {movieId}</div>
+        <div className="w-full h-screen flex">
+          <div className="w-1/2 h-full flex flex-col items-center">
+            <div className="text-4xl text-center">
+              {movie ? (
+                <p className="font-bold">{movie.title}</p>
+              ) : (
+                <p className="text-white">Loading title...</p>
+              )}
+            </div>
+            {poster ? (
+              <img
+                src={poster}
+                alt={`${movie.title} Poster`}
+                className="w-2/5 h-auto object-cover m-4 rounded"
+              />
+            ) : (
+              <img
+                src="/images/default.jpg"
+                alt="No Image Available"
+                className="w-2/5 h-auto object-cover m-4 rounded opacity-50"
+              />
+            )}
+            {movie ? (
+              <div className="w-4/5 p-4 mt-8 primary-background border-gray-700 border-2 rounded shadow-md">
+                <p>
+                  <strong>Director:</strong> {movie.director}
+                </p>
+                <p>
+                  <strong>Released:</strong> {movie.released}
+                </p>
+                <p>
+                  <strong>Copies:</strong> {movie.copies}
+                </p>
+              </div>
+            ) : (
+              <p>Loading information...</p>
+            )}
+          </div>
+          <div className="w-1/2 h-full flex flex-col items-center p-4">
+            <h2 className="text-2xl text-center font-bold mb-4">Reviews</h2>
+            <div className="p-4 w-full flex flex-col items-center">
+              {reviews.length > 0 ? (
+                reviews.map((review, index) => {
+                  const user = users.find(u => u.id === review.u_id);
+                  return (
+                    <div
+                      key={`${review.u_id}-${index}`}
+                      className="w-11/12 bg-gray-800 p-4 rounded shadow-md mb-4"
+                    >
+                      <p className="text-lg font-semibold mb-2">
+                        {user ? user.name : 'Unknown User'}
+                      </p>
+                      
+                      <div className="flex items-center mb-2">
+                        <span className="font-semibold mr-2">Rating:</span>
+                        {Array.from({ length: 5 }, (_, i) => (
+                          <svg
+                            key={i}
+                            className={`w-5 h-5 ${
+                              i < review.rating ? 'text-yellow-400' : 'text-gray-300'
+                            }`}
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg"
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.377 2.455a1 1 0 00-.364 1.118l1.286 3.967c.3.921-.755 1.688-1.54 1.118l-3.377-2.455a1 1 0 00-1.176 0l-3.377 2.455c-.785.57-1.84-.197-1.54-1.118l1.286-3.967a1 1 0 00-.364-1.118L2.98 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z" />
+                          </svg>
+                        ))}
+                      </div>
+                      <p className="text-gray-300">{review.review}</p>
+                    </div>
+                  );
+                })
+              ) : (
+                <p className="text-gray-400">No reviews available for this movie.</p>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );
