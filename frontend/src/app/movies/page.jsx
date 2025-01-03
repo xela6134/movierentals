@@ -12,7 +12,9 @@ export default function Movies() {
   const router = useRouter();
   const [movies, setMovies] = useState([]);
   const [posters, setPosters] = useState([]);
+  const [reviews, setReviews] = useState([]);
   const [error, setError] = useState('');
+  const [sortOption, setSortOption] = useState('id'); // New state for sorting
 
   useEffect(() => {
     if (!auth.loading) {
@@ -23,6 +25,7 @@ export default function Movies() {
       } else {
         fetchMovies();
         fetchPosters();
+        fetchReviews();
       }
     }
   }, [auth.loading, auth.isAuthenticated, router]);
@@ -50,6 +53,17 @@ export default function Movies() {
       })
   };
 
+  const fetchReviews = () => {
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/reviews`, { withCredentials: true })
+      .then((response) => {
+        setReviews(response.data);
+      })
+      .catch((error) => {
+        console.error(error);
+        setError("Failed to load reviews. Try again later");
+      })
+  };
+
   const posterLookup = useMemo(() => {
     return posters.reduce((acc, poster) => {
       acc[poster.id] = poster.img;
@@ -57,20 +71,83 @@ export default function Movies() {
     }, {});
   }, [posters]);
 
+  const reviewStats = useMemo(() => {
+    const stats = {};
+
+    reviews.forEach((review) => {
+      const movieId = review.m_id;
+      if (!stats[movieId]) {
+        stats[movieId] = { count: 0, totalRating: 0 };
+      }
+      stats[movieId].count += 1;
+      stats[movieId].totalRating += review.rating;
+    });
+
+    Object.keys(stats).forEach((id) => {
+      stats[id].average = (stats[id].totalRating / stats[id].count).toFixed(2);
+    });
+
+    return stats;
+  }, [reviews]);
+
+  const sortedMovies = useMemo(() => {
+    const moviesCopy = [...movies];
+
+    switch (sortOption) {
+      case 'reviews':
+        moviesCopy.sort((a, b) => {
+          const aReviews = reviewStats[a.id]?.count || 0;
+          const bReviews = reviewStats[b.id]?.count || 0;
+          return bReviews - aReviews;
+        });
+        break;
+      case 'rating':
+        moviesCopy.sort((a, b) => {
+          const aRating = parseFloat(reviewStats[a.id]?.average) || 0;
+          const bRating = parseFloat(reviewStats[b.id]?.average) || 0;
+          return bRating - aRating;
+        });
+        break;
+      case 'id':
+        moviesCopy.sort((a, b) => a.id - b.id);
+        break;
+      default:
+        moviesCopy.sort((a, b) => a.id - b.id);
+        break;
+    }
+
+    return moviesCopy;
+  }, [movies, reviewStats, sortOption]);
+
   return (
     <div className="min-h-screen flex items-center justify-start flex-col default-background text-white">
       <h1 className="text-center text-3xl my-8">Movies</h1>
       {!auth.loading && auth.isAuthenticated && (
         <>
           {error && <div className="mb-4 max-w-[208px] text-red-400">{error}</div>}
+          <div className="flex justify-end items-center w-full max-w-5xl px-4 mb-4">
+            <label htmlFor="sort" className="mr-2 font-semibold">Sort By:</label>
+            <select
+              id="sort"
+              value={sortOption}
+              onChange={(e) => setSortOption(e.target.value)}
+              className="bg-gray-700 text-white p-2 rounded"
+            >
+              <option value="id">ID (Default)</option>
+              <option value="reviews">Number of Reviews</option>
+              <option value="rating">Average Rating</option>
+            </select>
+          </div>
+          
           <div className="flex flex-wrap justify-center m-8 gap-4">
-            {movies.map((movie) => {
+            {sortedMovies.map((movie) => {
               const posterUrl = posterLookup[movie.id];
+              const stats = reviewStats[movie.id];
 
               return (
                 <div
                   key={movie.id}
-                  className="default-background border-gray-700 border-2 p-4 rounded shadow-md w-80 h-auto flex flex-col relative" // Added 'relative'
+                  className="default-background border-gray-700 border-2 p-4 rounded shadow-md w-80 h-auto flex flex-col relative"
                 >
                   {posterUrl ? (
                     <img
@@ -94,6 +171,12 @@ export default function Movies() {
                   </p>
                   <p>
                     <strong>Copies:</strong> {movie.copies}
+                  </p>
+                  <p>
+                    <strong>Reviews:</strong> {stats?.count || 0}
+                  </p>
+                  <p>
+                    <strong>Rating:</strong> {stats?.average || 'N/A'} / 5
                   </p>
                   <Link 
                     href={`/movies/${movie.id}`} 

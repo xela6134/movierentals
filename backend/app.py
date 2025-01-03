@@ -6,6 +6,7 @@ from flask_jwt_extended import JWTManager, create_access_token, jwt_required, ge
 from auth import auth_bp
 from movies import movies_bp
 from users import users_bp
+from reviews import reviews_bp
 import os
 
 load_dotenv()
@@ -28,6 +29,7 @@ CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 app.register_blueprint(auth_bp)
 app.register_blueprint(movies_bp)
 app.register_blueprint(users_bp)
+app.register_blueprint(reviews_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)
