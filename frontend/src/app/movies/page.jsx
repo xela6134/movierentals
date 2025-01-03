@@ -1,7 +1,7 @@
 // app/movies/page.jsx
 'use client';
 
-import React, { useContext, useEffect, useState, useMemo } from 'react'
+import React, { useContext, useEffect, useState, useMemo } from 'react';
 import Link from 'next/link';
 import { AuthContext } from '@/components/AuthContext';
 import { useRouter } from 'next/navigation';
@@ -12,7 +12,7 @@ export default function Movies() {
   const router = useRouter();
   const [movies, setMovies] = useState([]);
   const [posters, setPosters] = useState([]);
-  const [error, setError] = useState([]);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (!auth.loading) {
@@ -34,7 +34,7 @@ export default function Movies() {
       })
       .catch((error) => {
         console.error(error);
-        setError("Failed to load movies. Try again later")
+        setError("Failed to load movies. Try again later");
       })
   };
 
@@ -70,7 +70,7 @@ export default function Movies() {
               return (
                 <div
                   key={movie.id}
-                  className="bg-gray-800 p-4 rounded shadow-md w-80 h-auto flex flex-col"
+                  className="default-background border-gray-700 border-2 p-4 rounded shadow-md w-80 h-auto flex flex-col relative" // Added 'relative'
                 >
                   {posterUrl ? (
                     <img
@@ -97,11 +97,11 @@ export default function Movies() {
                   </p>
                   <Link 
                     href={`/movies/${movie.id}`} 
-                    className="text-red-600 font-bold mt-3 cursor-pointer"
+                    className="absolute bottom-4 right-4 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-900"
                     target="_blank"
                     rel="noopener noreferrer"
                   >
-                    More Information
+                    More
                   </Link>
                 </div>
               );

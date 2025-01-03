@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required
 import mysql.connector
 from dotenv import load_dotenv
-import os
+import os, requests
 
 load_dotenv()
 
@@ -32,7 +32,8 @@ def get_movies():
 
         return jsonify(movies), 200
     except Exception as e:
-        return jsonify({"msg": f"Internal server error: {e}"}), 500
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
         conn.close()
@@ -47,13 +48,11 @@ def get_movie_posters():
         query = "select * from movie_posters"
         cursor.execute(query)
         movies = cursor.fetchall()
-        
-        for row in movies:
-            print(row)
 
         return jsonify(movies), 200
     except Exception as e:
-        return jsonify({"msg": f"Internal server error: {e}"}), 500
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
         conn.close()
@@ -73,7 +72,8 @@ def get_movie_by_id(id):
         else:
             return jsonify({"msg": f"Movie with id {id} not found."}), 404
     except Exception as e:
-        return jsonify({"msg": f"Internal server error: {e}"}), 500
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
         conn.close()
@@ -93,7 +93,33 @@ def get_movie_poster_by_id(id):
         else:
             return jsonify({"msg": f"Movie poster with id {id} not found."}), 404
     except Exception as e:
-        return jsonify({"msg": f"Internal server error: {e}"}), 500
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
         conn.close()
+
+@movies_bp.route('/movies/detail', methods=['GET'])
+@jwt_required()
+def get_movie_details():
+    try:
+        title = request.args.get('title', type=str)
+        year = request.args.get('year', type=int)
+        
+        params = {
+            't': title,
+            'y': year,
+            'apikey': os.getenv('OMDBAPI_KEY')
+        }
+        
+        link = "https://www.omdbapi.com"
+        response = requests.get(link, params=params)
+        data = response.json()
+        
+        if data['Response'] == "True":
+            return data, 200
+        else:
+            return jsonify({"msg": f"Movie details with title {title} and year {year} not found"})
+    except Exception as e:
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal server error"}), 500

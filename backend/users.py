@@ -50,9 +50,10 @@ def get_username():
         if not user:
             return jsonify({"msg": "User not found."}), 404
         return jsonify({"username": user['name']}), 200
-    except mysql.connector.Error as err:
-        print(f"Database error: {err}")
+    except Exception as e:
+        print(f"Exception caught: {e}")
         return jsonify({"msg": "Internal server error."}), 500
     finally:
         cursor.close()
         conn.close()
+

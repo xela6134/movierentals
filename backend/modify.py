@@ -69,11 +69,12 @@ def main():
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        cursor.execute('delete from movie_posters')
+        link = 'https://m.media-amazon.com/images/M/MV5BYjk1Y2U4MjQtY2ZiNS00OWQyLWI3MmYtZWUwNmRjYWRiNWNhXkEyXkFqcGc@._V1_SX300.jpg'
+        cursor.execute('update movie_posters set img = %s where id = 17', (link,))
         conn.commit()
 
-        cursor.executemany(add_posters_query, posters_tuples)
-        conn.commit()
+        # cursor.executemany(add_posters_query, posters_tuples)
+        # conn.commit()
     except mysql.connector.Error as err:
         print(f"add posters error: {err}")
         conn.rollback()
