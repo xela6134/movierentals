@@ -64,7 +64,7 @@ export default function Login() {
         }, 1500);
       })
       .catch((error) => {
-        console.error('Login error:', error.response);
+        console.error(error);
         if (error.response && error.response.data && error.response.data.msg) {
           setError(error.response.data.msg);
         } else {

@@ -14,7 +14,7 @@ export default function Movies() {
   const [posters, setPosters] = useState([]);
   const [reviews, setReviews] = useState([]);
   const [error, setError] = useState('');
-  const [sortOption, setSortOption] = useState('id'); // New state for sorting
+  const [sortOption, setSortOption] = useState('id');
 
   useEffect(() => {
     if (!auth.loading) {
@@ -111,6 +111,9 @@ export default function Movies() {
       case 'id':
         moviesCopy.sort((a, b) => a.id - b.id);
         break;
+      case 'title':
+        moviesCopy.sort((a, b) => a.title.localeCompare(b.title));
+        break;
       default:
         moviesCopy.sort((a, b) => a.id - b.id);
         break;
@@ -135,6 +138,7 @@ export default function Movies() {
                 className="bg-gray-700 text-white p-2 rounded"
               >
                 <option value="id">ID (Default)</option>
+                <option value="title">Alphabetical Order</option>
                 <option value="reviews">Number of Reviews</option>
                 <option value="rating">Average Rating</option>
               </select>

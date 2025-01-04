@@ -15,6 +15,8 @@ export default function MovieDetail() {
   const [poster, setPoster] = useState();
   const [reviews, setReviews] = useState([]);
   const [users, setUsers] = useState([]);
+  const [moreData, setMoreData] = useState();
+  const [error, setError] = useState();
 
   const movieId = params.id;
 
@@ -42,6 +44,7 @@ export default function MovieDetail() {
       })
       .catch((error) => {
         console.error(error);
+        setError("Error fetching movie information.");
       })
   };
 
@@ -54,6 +57,7 @@ export default function MovieDetail() {
       })
       .catch((error) => {
         console.error(error);
+        setError("Error fetching movie poster.");
       })
   };
 
@@ -63,10 +67,10 @@ export default function MovieDetail() {
       .then((response) => {
         const data = response.data;
         setReviews(data);
-        console.log(data);
       })
       .catch((error) => {
         console.error(error);
+        setError("Error fetching reviews.");
       })
   };
 
@@ -76,15 +80,38 @@ export default function MovieDetail() {
       .then((response) => {
         const data = response.data;
         setUsers(data);
-        console.log(data);
       })
       .catch((error) => {
         console.error(error);
+        setError("Error fetching users.");
       })
   }
 
   const fetchDetails = () => {
+    if (!movie.title || !movie.released) {
+      console.error("Movie title or release date is missing.");
+      return;
+    }
 
+    const title = movie.title;
+    const year = movie.released;
+
+    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/movies/detail`, {
+      params: { title, year },
+      withCredentials: true
+    })
+      .then((response) => {
+        const data = response.data;
+        if (data["Response"] == "True") {
+          setMoreData(data);
+        } else {
+          setError("Cannot fetch details about this movie.");
+        }
+      })
+      .catch((error) => {
+        console.error("Error fetching movie details:", error);
+        setError("Error fetching movie details.");
+      });
   };
 
   return (
@@ -115,6 +142,7 @@ export default function MovieDetail() {
                 className="w-2/5 h-auto object-cover m-4 rounded opacity-50"
               />
             )}
+            {error && <div className="text-red-400 text-xl mt-2">{error}</div>}
             {movie ? (
               <div className="w-4/5 p-4 mt-8 primary-background border-gray-700 border-2 rounded shadow-md">
                 <p>
@@ -126,6 +154,38 @@ export default function MovieDetail() {
                 <p>
                   <strong>Copies:</strong> {movie.copies}
                 </p>
+                {moreData ? (
+                  <>
+                    <p>
+                      <strong>Actors:</strong> {moreData.Actors}
+                    </p>
+                    <p>
+                      <strong>Awards:</strong> {moreData.Awards}
+                    </p>
+                    <p>
+                      <strong>Box Office:</strong> {moreData.BoxOffice}
+                    </p>
+                    <p>
+                      <strong>Metascore:</strong> {moreData.Metascore}
+                    </p>
+                    <p>
+                      <strong>Plot:</strong> {moreData.Plot}
+                    </p>
+                    <p>
+                      <strong>Rated:</strong> {moreData.Rated}
+                    </p>
+                    <p>
+                      <strong>IMDB Rating:</strong> {moreData.imdbRating}
+                    </p>
+                  </>
+                ) : (
+                  <button 
+                    className="my-4 border-2 border-white px-2 py-1 rounded"
+                    onClick={fetchDetails}
+                  >
+                    More information
+                  </button>
+                )}
               </div>
             ) : (
               <p>Loading information...</p>
