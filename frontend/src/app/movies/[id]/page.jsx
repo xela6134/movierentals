@@ -4,6 +4,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import axios from 'axios';
+import Link from 'next/link';
 import { AuthContext } from '@/components/AuthContext';
 
 export default function MovieDetail() {
@@ -143,17 +144,25 @@ export default function MovieDetail() {
               />
             )}
             {error && <div className="text-red-400 text-xl mt-2">{error}</div>}
+            <Link 
+              href={`/borrow/${movieId}`}
+              className="bg-red-600 hover:bg-red-900 text-xl my-2 px-4 py-2 rounded"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Borrow this DVD!
+            </Link>
             {movie ? (
               <div className="w-4/5 p-4 mt-8 primary-background border-gray-700 border-2 rounded shadow-md">
+                <p className="text-xl mb-2">
+                  <strong>Copies:</strong> <span className="text-red-600 font-bold">{movie.copies}</span>
+                </p>
                 <p>
                   <strong>Director:</strong> {movie.director}
                 </p>
                 <p>
                   <strong>Released:</strong> {movie.released}
-                </p>
-                <p>
-                  <strong>Copies:</strong> {movie.copies}
-                </p>
+                </p>                
                 {moreData ? (
                   <>
                     <p>

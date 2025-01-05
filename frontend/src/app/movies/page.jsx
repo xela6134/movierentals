@@ -8,7 +8,7 @@ import { useRouter } from 'next/navigation';
 import axios from 'axios';
 
 export default function Movies() {
-  const { auth } = useContext(AuthContext);
+  const { auth, setAuth } = useContext(AuthContext);
   const router = useRouter();
   const [movies, setMovies] = useState([]);
   const [posters, setPosters] = useState([]);
@@ -126,7 +126,7 @@ export default function Movies() {
     <div className="min-h-screen flex items-center justify-start flex-col default-background text-white">
       {!auth.loading && auth.isAuthenticated && (
         <>
-          {error && <div className="mb-4 max-w-[208px] text-red-400">{error}</div>}
+          {error && <div className="mb-4 text-red-400">{error}</div>}
           <div className="flex justify-between items-center w-full px-32 my-4">
             <div className="text-4xl">Movies</div>
             <div className="flex items-center">
@@ -143,7 +143,10 @@ export default function Movies() {
                 <option value="rating">Average Rating</option>
               </select>
             </div>
-          </div>          
+          </div>
+          <div className="text-xl">
+            A fine list of our specially selected DVDs, only available for rent on <span className="text-2xl font-bold text-red-600 font-bebas">CineVault</span>.
+          </div>
           <div className="flex flex-wrap justify-center m-8 gap-4">
             {sortedMovies.map((movie) => {
               const posterUrl = posterLookup[movie.id];
@@ -194,6 +197,9 @@ export default function Movies() {
                 </div>
               );
             })}
+          </div>
+          <div className="text-xl mb-8">
+            Finished browsing? Click <Link href={`/borrow`} className="cursor-pointer text-red-600">here</Link> to borrow your movie.
           </div>
         </>
       )}
