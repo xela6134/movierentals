@@ -57,6 +57,9 @@ export default function NavBar() {
             <Link href="/borrow" className="text-white hover:text-red-600">
               Borrow
             </Link>
+            <Link href="/profile" className="text-white hover:text-red-600">
+              Profile
+            </Link>
             <button
               onClick={handleLogout}
               className="text-white hover:text-red-600 focus:outline-none"

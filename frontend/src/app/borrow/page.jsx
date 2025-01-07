@@ -62,10 +62,25 @@ export default function Borrow() {
               className="w-3/4 px-2 py-1 h-10 text-black rounded-lg focus:outline-none"
             />
           </div>
+          <div className="default-background w-3/4 text-xl rounded-lg h-16 border-2 border-gray-700 flex items-center px-4 py-2">
+            Haven't decided yet? Click&nbsp;
+            <Link 
+              href={'/movies'} 
+              className="text-red-600 hover:text-red-900 text-xl"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              here
+            </Link>
+            &nbsp;to keep choosing your movie.
+          </div>
           {error && <div className="mb-4 text-red-400">{error}</div>}
           {filteredMovies.map((movie) => {
             return (
-              <div className="default-background w-3/4 text-xl border-2 border-gray-700 rounded-lg h-16 px-4 py-2 flex justify-between items-center">
+              <div
+                key={movie.id} 
+                className="default-background w-3/4 text-xl border-2 border-gray-700 rounded-lg h-16 px-4 py-2 flex justify-between items-center"
+              >
                 <div>
                   {movie.title}
                 </div>
@@ -86,7 +101,7 @@ export default function Borrow() {
         </div>
       )}
       {!auth.loading && !auth.isAuthenticated && (
-        <div>Not allowed to view movies. Redirecting to home page...</div>
+        <div className="text-white text-center mt-8">Not allowed to borrow movies. Redirecting to home page...</div>
       )}
     </>
   )

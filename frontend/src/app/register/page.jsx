@@ -81,7 +81,7 @@ export default function Register() {
         setSuccess('Registration successful! Redirecting to login...');
         
         setTimeout(() => {
-          router.push('/');
+          router.push('/login');
         }, 1500);
       })
       .catch((error) => {
