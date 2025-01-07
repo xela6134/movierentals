@@ -125,7 +125,6 @@ def login():
 @jwt_required()
 def auth_status():
     current_user_id = get_jwt_identity()
-    print(f"CURR ID: {current_user_id}")
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)

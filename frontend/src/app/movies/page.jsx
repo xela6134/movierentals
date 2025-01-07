@@ -165,7 +165,7 @@ export default function Movies() {
                     />
                   ) : (
                     <img
-                      src="/images/default.jpg"
+                      src="/images/default_movie.jpg"
                       alt="No Image Available"
                       className="w-full h-60 object-cover mb-4 rounded opacity-50"
                     />
