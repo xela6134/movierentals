@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { AuthContext } from './AuthContext';
 import axios from 'axios';
+import Cookies from 'js-cookie';
 
 export default function NavBar() {
   const { auth, setAuth } = useContext(AuthContext);
@@ -26,6 +27,10 @@ export default function NavBar() {
         console.error('Logout error:', error.response);
       });
   };
+
+  setTimeout(() => {
+    console.log(Cookies.get('csrf_access_token'));
+  }, 5000);
 
   return (
     <nav className="fixed top-0 left-0 w-full h-20 default-background shadow-md flex items-center justify-between px-6 z-50">

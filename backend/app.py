@@ -19,9 +19,10 @@ app.config['JWT_SECRET_KEY'] = os.getenv('JWT_SECRET_KEY')
 app.config['JWT_ACCESS_TOKEN_EXPIRES'] = int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES'))
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token_cookie'
-app.config['JWT_COOKIE_SECURE'] = False    # For localhost dev only, change in production
+app.config['JWT_COOKIE_SECURE'] = False         # TODO: For localhost dev only, change in production
 app.config['JWT_COOKIE_SAMESITE'] = 'None'
 app.config['JWT_ACCESS_COOKIE_PATH'] = '/'
+app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 
 # Change the origin on deploy
 CORS(app, origins=["http://localhost:3000"], supports_credentials=True)

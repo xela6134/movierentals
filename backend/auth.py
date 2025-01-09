@@ -4,11 +4,12 @@ from flask_jwt_extended import (
     create_access_token, 
     jwt_required, 
     get_jwt_identity, 
+    set_access_cookies,
     unset_jwt_cookies, 
     unset_access_cookies
 )
-
 import mysql.connector
+import uuid
 from dotenv import load_dotenv
 import os
 
@@ -102,14 +103,26 @@ def login():
 
         # Create JWT
         access_token = create_access_token(identity=user['id'])
-
         response = jsonify({"msg": "Login successful."})
+        set_access_cookies(response, access_token)
+
         response.set_cookie(
             'access_token_cookie',
             access_token,
             httponly=True,
             secure=True,
-            samesite='None',     # samesite='None' and secure=True must be used together.
+            samesite='None',    # samesite='None' and secure=True must be used together.
+            max_age=3600
+        )
+        
+        # Create CSRF
+        csrf_token = str(uuid.uuid4())
+        response.set_cookie(
+            'csrf_access_token',
+            csrf_token,
+            httponly=False,     # Must be False so JS can read this
+            secure=True,
+            samesite='None',
             max_age=3600
         )
 
@@ -141,29 +154,127 @@ def auth_status():
         cursor.close()
         conn.close()
 
+# Checks if password is valid for current user
+@auth_bp.route('/auth/validate', methods=['GET'])
+@jwt_required()
+def validate():
+    try:
+        password = request.args.get('password', type=str)
+        current_user_id = get_jwt_identity()
+
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        cursor.execute("select * from users where id = %s", (current_user_id,))
+        user = cursor.fetchone()
+
+        if not user:
+            return jsonify({"msg": "User not found."}), 404
+
+        if bcrypt.check_password_hash(user['password'], password):
+            return jsonify({"msg": "Password correct."}), 200
+        else:
+            return jsonify({"msg": "Invalid password."}), 401
+    except Exception as e:
+        print(f"Exception: {e}")
+        return jsonify({"msg": "Internal server error."}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@auth_bp.route('/auth/update', methods=['POST'])
+@jwt_required()
+def update():
+    data = request.get_json()
+    name = data.get('name')
+    age = data.get('age')
+    password = data.get('password')
+
+    if not any([name, age, password]):
+        return jsonify({"msg": "At least one field (name, age, password) must be provided."}), 400
+
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+
+        current_user_id = get_jwt_identity()
+
+        cursor.execute("select * from users where id = %s", (current_user_id,))
+        user = cursor.fetchone()
+
+        if not user:
+            return jsonify({"msg": "User not found."}), 404
+
+        # Prepare fields to update
+        update_fields = []
+        update_values = []
+
+        if name:
+            update_fields.append("name = %s")
+            update_values.append(name)
+
+        if age:
+            try:
+                age = int(age)
+                if age <= 0 or age > 120:
+                    return jsonify({"msg": "Age must be between 1 and 120."}), 400
+                update_fields.append("age = %s")
+                update_values.append(age)
+            except ValueError:
+                return jsonify({"msg": "Age must be a valid number."}), 400
+
+        if password:
+            hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
+            update_fields.append("password = %s")
+            update_values.append(hashed_password)
+
+        if not update_fields:
+            return jsonify({"msg": "No valid fields to update."}), 400
+
+        print(f"Fields: {update_fields}")
+
+        # update_query = f"update users set {', '.join(update_fields)} where id = %s"
+        # update_values.append(current_user_id)
+        
+        # cursor.execute(update_query, tuple(update_values))
+        # conn.commit()
+
+        return jsonify({"msg": "Profile updated successfully."}), 200
+    except Exception as e:
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal server error."}), 500
+
+    finally:
+        cursor.close()
+        conn.close()
+
 @auth_bp.route('/auth/logout', methods=['POST'])
 def logout():
-    response = jsonify({"msg": "Logout successful."})
-    unset_jwt_cookies(response)
-    unset_access_cookies(response)
+    try:
+        response = jsonify({"msg": "Logout successful."})
+        unset_jwt_cookies(response)
+        unset_access_cookies(response)
 
-    # Cookies are not deleted locally without these?
-    response.set_cookie(
-        key='csrftoken',
-        value='',
-        expires=0,
-        httponly=True,
-        secure=True,
-        samesite='None',
-        path='/'
-    )
-    response.set_cookie(
-        key='access_token_cookie',
-        value='',
-        expires=0,
-        httponly=True,
-        secure=True,
-        samesite='None',
-        path='/'
-    )
-    return response, 200
+        # Cookies are not deleted locally without these?
+        response.set_cookie(
+            key='csrf_access_token',
+            value='',
+            expires=0,
+            httponly=True,
+            secure=True,
+            samesite='None',
+            path='/'
+        )
+        response.set_cookie(
+            key='access_token_cookie',
+            value='',
+            expires=0,
+            httponly=True,
+            secure=True,
+            samesite='None',
+            path='/'
+        )
+        return response, 200
+    except Exception as e:
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal server error."}), 500

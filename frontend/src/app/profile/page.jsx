@@ -1,9 +1,12 @@
+// app/profile/page.jsx
 'use client';
 
 import { AuthContext } from '@/components/AuthContext';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import Cookies from 'js-cookie';
 
 export default function User() {
   const { auth } = useContext(AuthContext);
@@ -11,11 +14,21 @@ export default function User() {
 
   const [userInfo, setUserInfo] = useState(null);
   const [error, setError] = useState('');
-  const [updateProfile, setUpdateProfile] = useState(false);
 
-  // For editing profile
+  // States for updating profile
+  const [updateProfile, setUpdateProfile] = useState(false);
   const [name, setName] = useState('');
   const [age, setAge] = useState('');
+  const [password, setPassword] = useState('');
+
+  // States for password confirmation
+  const [isPasswordConfirmed, setIsPasswordConfirmed] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [passwordError, setPasswordError] = useState('');
+
+  // State to toggle password visibility
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     if (!auth.loading) {
@@ -29,8 +42,7 @@ export default function User() {
     }
   }, [auth.loading, auth.isAuthenticated, router]);
 
-  // Async function to fetch user ID and then user information
-  // Used instead of promises
+  // Async function to fetch user data
   const fetchUserData = async () => {
     try {
       // Fetch current user's ID
@@ -50,6 +62,79 @@ export default function User() {
       setTimeout(() => {
         router.push('/');
       }, 1500);
+    }
+  };
+
+  // Handle password confirmation
+  const handlePasswordConfirm = async (e) => {
+    e.preventDefault();
+    setPasswordError('');
+
+    try {
+      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/validate`, {
+        params: { password: passwordInput },
+        withCredentials: true,
+      });
+
+      if (response.status === 200) {
+        setIsPasswordConfirmed(true);
+        setUpdateProfile(true);
+        setPasswordInput('');
+      }
+    } catch (err) {
+      console.error(err);
+      if (err.response && err.response.data && err.response.data.msg) {
+        setPasswordError(err.response.data.msg);
+      } else {
+        setPasswordError('An error occurred during password validation. Please try again.');
+      }
+    }
+  };
+
+  // Handler for initiating profile update (after password confirmation)
+  const initiateProfileUpdate = () => {
+    setUpdateProfile(true);
+    setIsPasswordConfirmed(false);
+    setPasswordError('');
+  };
+
+  const handleProfileUpdate = async (e) => {
+    e.preventDefault();
+    setError('');
+
+    try {
+      const payload = {
+        name: name || userInfo.name,  // Use existing name if not changed
+        age: age || userInfo.age,     // Use existing age if not changed
+      };
+
+      if (password) {
+        payload.password = password; // Include password only if provided
+      }
+
+      const csrfToken = Cookies.get('csrf_access_token');
+      console.log(csrfToken);
+
+      // Update user information
+      const response = await axios.post(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/update`,
+        payload,
+        {
+          headers: { 'X-CSRF-TOKEN': csrfToken, },
+          withCredentials: true,
+        }
+      );
+
+      if (response.status === 200) {
+        fetchUserData();
+        setUpdateProfile(false);
+        setIsPasswordConfirmed(false);
+        setPassword('');
+        alert('Profile updated successfully!');
+      }
+    } catch (err) {
+      console.error(err);
+      setError('Failed to update profile. Please try again.');
     }
   };
 
@@ -90,52 +175,151 @@ export default function User() {
                   ) : (
                     <p>
                       <strong>User Status:</strong> Default User
-                    </p>                
+                    </p>
                   )}
                   {userInfo.suspended ? (
                     <p>
                       <strong>Suspension Status:</strong> <span className="text-red-400">Suspended</span>
-                    </p>   
+                    </p>
                   ) : (
                     <p>
                       <strong>Suspension Status:</strong> <span className="text-green-400">Not Suspended</span>
                     </p>
                   )}
-                  {updateProfile ? (
-                    <form>
-                      <label htmlFor="userId" className="block mb-2">Name</label>
-                      <input
-                        type="text"
-                        id="userId"
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        required
-                        className="w-full mb-4 p-2 rounded focus:outline-none text-black"
-                      />
-                      <label htmlFor="age" className="block mb-2">Age</label>
-                      <input
-                        type="number"
-                        id="age"
-                        value={age}
-                        onChange={(e) => setAge(e.target.value)}
-                        required
-                        className="w-full mb-4 p-2 rounded focus:outline-none text-black"
-                        min="1"
-                        max="120"
-                      />
-                    </form>
-                  ) : (
-                    <button 
+
+                  {!updateProfile && (
+                    <button
                       className="w-2/5 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-900"
-                      onClick={() => { setUpdateProfile(true) }}
+                      onClick={initiateProfileUpdate}
                     >
-                      Update profile
+                      Update Profile
                     </button>
+                  )}
+
+                  {updateProfile && !isPasswordConfirmed && (
+                    <div className="w-full">
+                      <h2 className="text-2xl mb-4">Confirm Your Password</h2>
+                      {passwordError && <div className="mb-4 text-red-600">{passwordError}</div>}
+                      <form onSubmit={handlePasswordConfirm}>
+                        <div className="mb-4 relative">
+                          <label htmlFor="confirmPassword" className="block mb-2">Password</label>
+                          <input
+                            type={showConfirmPassword ? "text" : "password"}
+                            id="confirmPassword"
+                            value={passwordInput}
+                            onChange={(e) => setPasswordInput(e.target.value)}
+                            required
+                            className="w-full p-2 rounded focus:outline-none text-black pr-10"
+                          />
+                          <span
+                            className="absolute top-12 right-3 flex items-center cursor-pointer"
+                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          >
+                            {showConfirmPassword ? 
+                              <FaEyeSlash className="text-black"/> 
+                            : 
+                              <FaEye className="text-black"/>
+                            }
+                          </span>
+                        </div>
+                        <div className="flex gap-4">
+                          <button
+                            type="submit"
+                            className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-900"
+                          >
+                            Confirm
+                          </button>
+                          <button
+                            type="button"
+                            className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-900"
+                            onClick={() => {
+                              setUpdateProfile(false);
+                              setPasswordError('');
+                              setPasswordInput('');
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      </form>
+                    </div>
+                  )}
+
+                  {updateProfile && isPasswordConfirmed && (
+                    <form onSubmit={handleProfileUpdate}>
+                      <div className="mb-4 relative">
+                        <label htmlFor="name" className="block mb-2">Name</label>
+                        <input
+                          type="text"
+                          id="name"
+                          value={name}
+                          onChange={(e) => setName(e.target.value)}
+                          className="w-full p-2 rounded focus:outline-none text-black"
+                          placeholder={userInfo.name}
+                        />
+                      </div>
+                      <div className="mb-4 relative">
+                        <label htmlFor="age" className="block mb-2">Age</label>
+                        <input
+                          type="number"
+                          id="age"
+                          value={age}
+                          onChange={(e) => setAge(e.target.value)}
+                          className="w-full p-2 rounded focus:outline-none text-black"
+                          placeholder={userInfo.age}
+                          min="1"
+                          max="120"
+                        />
+                      </div>
+                      <div className="mb-4 relative">
+                        <label htmlFor="password" className="block mb-2">New Password</label>
+                        <input
+                          type={showPassword ? "text" : "password"}
+                          id="password"
+                          value={password}
+                          onChange={(e) => setPassword(e.target.value)}
+                          className="w-full p-2 rounded focus:outline-none text-black pr-10"
+                          placeholder="Leave blank to keep current password"
+                        />
+                        <span
+                          className="absolute top-12 right-3 flex items-center cursor-pointer"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? 
+                            <FaEyeSlash className="text-black"/> 
+                          : 
+                            <FaEye className="text-black"/>
+                          }
+                        </span>
+                      </div>
+                      <div className="flex gap-4">
+                        <button
+                          type="submit"
+                          className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-900"
+                        >
+                          Save Changes
+                        </button>
+                        <button
+                          type="button"
+                          className="bg-gray-600 text-white px-4 py-2 rounded hover:bg-gray-900"
+                          onClick={() => {
+                            setUpdateProfile(false);
+                            setIsPasswordConfirmed(false);
+                            setPasswordError('');
+                            setName('');
+                            setAge('');
+                            setPassword('');
+                          }}
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                    </form>
                   )}
                 </div>
               </div>
             ) : (
-              <div>Loading user information...</div>
+              <div>Loading your information...</div>
             )}
           </div>
           <div className="w-1/2 h-full flex flex-col items-center bg-gray-400">
