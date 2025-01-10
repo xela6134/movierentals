@@ -75,7 +75,7 @@ export default function Register() {
       age: age,
     };
 
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/register`, payload)
+    axios.post(`/api/auth/register`, payload)
       .then((response) => {
         console.log('Registration successful:', response.data);
         setSuccess('Registration successful! Redirecting to login...');

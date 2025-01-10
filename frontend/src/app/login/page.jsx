@@ -37,12 +37,12 @@ export default function Login() {
       password: password,
     };
 
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/login`, payload, { withCredentials: true })
+    axios.post(`/api/auth/login`, payload, { withCredentials: true })
       .then((response) => {
         console.log('Login successful:', response.data);
         setSuccess('Login successful! Redirecting...');
 
-        axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/status`, { withCredentials: true })
+        axios.get(`/api/auth/status`, { withCredentials: true })
           .then((res) => {
             setAuth({
               isAuthenticated: res.data.authenticated,

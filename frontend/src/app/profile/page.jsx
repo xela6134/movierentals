@@ -46,13 +46,13 @@ export default function User() {
   const fetchUserData = async () => {
     try {
       // Fetch current user's ID
-      const idResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/currid`, {
+      const idResponse = await axios.get(`/api/users/currid`, {
         withCredentials: true,
       });
       const userId = idResponse.data.id;
 
       // Fetch user information using the obtained ID
-      const infoResponse = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users/${userId}`, {
+      const infoResponse = await axios.get(`/api/users/${userId}`, {
         withCredentials: true,
       });
       setUserInfo(infoResponse.data);
@@ -71,7 +71,7 @@ export default function User() {
     setPasswordError('');
 
     try {
-      const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/validate`, {
+      const response = await axios.get(`/api/auth/validate`, {
         params: { password: passwordInput },
         withCredentials: true,
       });
@@ -117,7 +117,7 @@ export default function User() {
 
       // Update user information
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/update`,
+        `/api/auth/update`,
         payload,
         {
           headers: { 'X-CSRF-TOKEN': csrfToken, },

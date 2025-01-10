@@ -28,7 +28,7 @@ export default function Borrow() {
   }, [auth.loading, auth.isAuthenticated, router])
 
   const fetchMovies = () => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/movies`, { withCredentials: true })
+    axios.get(`/api/movies`, { withCredentials: true })
       .then((response) => {
         setMovies(response.data);
         setFilteredMovies(response.data);

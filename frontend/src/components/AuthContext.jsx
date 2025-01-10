@@ -17,7 +17,7 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const checkAuthStatus = () => {
-      axios.get(`${process.env.NEXT_PUBLIC_API_URL}/auth/status`, { withCredentials: true })
+      axios.get(`/api/auth/status`, { withCredentials: true })
         .then((response) => {
           setAuth({
             isAuthenticated: true,

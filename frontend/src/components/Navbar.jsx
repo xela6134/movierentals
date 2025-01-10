@@ -13,7 +13,7 @@ export default function NavBar() {
   const router = useRouter();
 
   const handleLogout = () => {
-    axios.post(`${process.env.NEXT_PUBLIC_API_URL}/auth/logout`, {}, { withCredentials: true })
+    axios.post(`/api/auth/logout`, {}, { withCredentials: true })
       .then((response) => {
         console.log('Logout successful:', response.data.msg);
         setAuth({

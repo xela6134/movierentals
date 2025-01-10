@@ -83,7 +83,6 @@ def login():
     user_id = data.get('user_id')
     password = data.get('password')
 
-    # Basic validation
     if not user_id or not password:
         return jsonify({"msg": "User ID and password are required."}), 400
 
@@ -103,33 +102,16 @@ def login():
 
         # Create JWT
         access_token = create_access_token(identity=user['id'])
+
         response = jsonify({"msg": "Login successful."})
         set_access_cookies(response, access_token)
 
-        response.set_cookie(
-            'access_token_cookie',
-            access_token,
-            httponly=True,
-            secure=True,
-            samesite='None',    # samesite='None' and secure=True must be used together.
-            max_age=3600
-        )
-        
-        # Create CSRF
-        csrf_token = str(uuid.uuid4())
-        response.set_cookie(
-            'csrf_access_token',
-            csrf_token,
-            httponly=False,     # Must be False so JS can read this
-            secure=True,
-            samesite='None',
-            max_age=3600
-        )
-
         return response, 200
+
     except Exception as e:
         print(f"Exception: {e}")
         return jsonify({"msg": "Internal server error."}), 500
+
     finally:
         cursor.close()
         conn.close()
@@ -254,26 +236,6 @@ def logout():
         response = jsonify({"msg": "Logout successful."})
         unset_jwt_cookies(response)
         unset_access_cookies(response)
-
-        # Cookies are not deleted locally without these?
-        response.set_cookie(
-            key='csrf_access_token',
-            value='',
-            expires=0,
-            httponly=True,
-            secure=True,
-            samesite='None',
-            path='/'
-        )
-        response.set_cookie(
-            key='access_token_cookie',
-            value='',
-            expires=0,
-            httponly=True,
-            secure=True,
-            samesite='None',
-            path='/'
-        )
         return response, 200
     except Exception as e:
         print(f"Exception caught: {e}")

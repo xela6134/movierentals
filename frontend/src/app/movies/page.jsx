@@ -31,7 +31,7 @@ export default function Movies() {
   }, [auth.loading, auth.isAuthenticated, router]);
 
   const fetchMovies = () => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/movies`, { withCredentials: true })
+    axios.get(`/api/movies`, { withCredentials: true })
       .then((response) => {
         setMovies(response.data);
       })
@@ -42,10 +42,9 @@ export default function Movies() {
   };
 
   const fetchPosters = () => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/movie_posters`, { withCredentials: true })
+    axios.get(`/api/movie_posters`, { withCredentials: true })
       .then((response) => {
         setPosters(response.data);
-        console.log(response.data);
       })
       .catch((error) => {
         console.error(error);
@@ -54,7 +53,7 @@ export default function Movies() {
   };
 
   const fetchReviews = () => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/reviews`, { withCredentials: true })
+    axios.get(`/api/reviews`, { withCredentials: true })
       .then((response) => {
         setReviews(response.data);
       })

@@ -38,7 +38,7 @@ export default function MovieDetail() {
 
   // Fetches info about current movie
   const fetchMovie = () => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/movies/${movieId}`, { withCredentials: true })
+    axios.get(`/api/movies/${movieId}`, { withCredentials: true })
       .then((response) => {
         const data = response.data;
         setMovie(data);
@@ -51,7 +51,7 @@ export default function MovieDetail() {
 
   // Fetches poster about current movie
   const fetchPoster = () => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/movie_posters/${movieId}`, { withCredentials: true })
+    axios.get(`/api/movie_posters/${movieId}`, { withCredentials: true })
       .then((response) => {
         const data = response.data;
         setPoster(data.img);
@@ -64,7 +64,7 @@ export default function MovieDetail() {
 
   // Fetches reviews about current movie
   const fetchReviews = () => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/reviews/movie/${movieId}`, { withCredentials: true })
+    axios.get(`/api/reviews/movie/${movieId}`, { withCredentials: true })
       .then((response) => {
         const data = response.data;
         setReviews(data);
@@ -77,7 +77,7 @@ export default function MovieDetail() {
 
   // Fetches all users
   const fetchUsers = () => {
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/users`, { withCredentials: true })
+    axios.get(`/api/users`, { withCredentials: true })
       .then((response) => {
         const data = response.data;
         setUsers(data);
@@ -97,7 +97,7 @@ export default function MovieDetail() {
     const title = movie.title;
     const year = movie.released;
 
-    axios.get(`${process.env.NEXT_PUBLIC_API_URL}/movies/detail`, {
+    axios.get(`/api/movies/detail`, {
       params: { title, year },
       withCredentials: true
     })
