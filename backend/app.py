@@ -7,6 +7,7 @@ from auth import auth_bp
 from movies import movies_bp
 from users import users_bp
 from reviews import reviews_bp
+from reservations import reservations_bp
 import os
 
 load_dotenv()
@@ -32,6 +33,7 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(movies_bp)
 app.register_blueprint(users_bp)
 app.register_blueprint(reviews_bp)
+app.register_blueprint(reservations_bp)
 
 if __name__ == '__main__':
     app.run(debug=True)

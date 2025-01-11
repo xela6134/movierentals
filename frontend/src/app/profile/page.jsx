@@ -318,9 +318,18 @@ export default function User() {
               <div>Loading your information...</div>
             )}
           </div>
-          <div className="w-1/2 h-full flex flex-col items-center bg-gray-400">
+          <div className="w-1/2 h-full flex flex-col items-center">
             <div className="text-3xl mt-4 mb-6">
-              Your Movies
+              Currently Borrowing
+            </div>
+            <div className="w-4/5 border-gray-700 border-2 p-4 rounded-lg">
+              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Est exercitationem doloremque repudiandae omnis, corporis illo sapiente id ducimus atque consequuntur eum amet corrupti, distinctio dolorem consequatur veniam aspernatur dignissimos! Iste.
+            </div>
+            <div className="text-3xl mt-4 mb-6">
+              Previously Borrowed
+            </div>
+            <div className="w-4/5 border-gray-700 border-2 p-4 rounded-lg">
+              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Est exercitationem doloremque repudiandae omnis, corporis illo sapiente id ducimus atque consequuntur eum amet corrupti, distinctio dolorem consequatur veniam aspernatur dignissimos! Iste.
             </div>
           </div>
         </div>

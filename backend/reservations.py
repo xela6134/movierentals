@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import Blueprint, jsonify
 from flask_jwt_extended import jwt_required
 import mysql.connector
 from dotenv import load_dotenv
@@ -6,7 +6,7 @@ import os
 
 load_dotenv()
 
-reviews_bp = Blueprint('reviews', __name__)
+reservations_bp = Blueprint('reservations', __name__)
 
 config = {
     'user': os.getenv('DB_USER'),
@@ -19,18 +19,18 @@ config = {
 def get_db_connection():
     return mysql.connector.connect(**config)
 
-@reviews_bp.route('/reviews', methods=['GET'])
+@reservations_bp.route('/reservations', methods=['GET'])
 @jwt_required()
-def get_reviews():
+def get_reservations():
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        query = "select * from reviews"
+        query = "select * from reservations"
         cursor.execute(query)
-        reviews = cursor.fetchall()
+        reservations = cursor.fetchall()
 
-        return jsonify(reviews), 200
+        return jsonify(reservations), 200
     except Exception as e:
         print(f"Exception caught: {e}")
         return jsonify({"msg": "Internal server error"}), 500
@@ -38,18 +38,18 @@ def get_reviews():
         cursor.close()
         conn.close()
 
-@reviews_bp.route('/reviews/movie/<int:id>', methods=['GET'])
+@reservations_bp.route('/reservations/movie/<int:id>', methods=['GET'])
 @jwt_required()
-def get_reviews_by_movie(id):
+def get_reservations_by_movie(id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        query = "select * from reviews where m_id = %s"
+        query = "select * from reservations where m_id = %s"
         cursor.execute(query, (id,))
-        reviews = cursor.fetchall()
+        reservations = cursor.fetchall()
 
-        return jsonify(reviews), 200
+        return jsonify(reservations), 200
     except Exception as e:
         print(f"Exception caught: {e}")
         return jsonify({"msg": "Internal server error"}), 500
@@ -57,18 +57,18 @@ def get_reviews_by_movie(id):
         cursor.close()
         conn.close()
 
-@reviews_bp.route('/reviews/user/<int:id>', methods=['GET'])
+@reservations_bp.route('/reservations/user/<int:id>', methods=['GET'])
 @jwt_required()
-def get_reviews_by_user(id):
+def get_reservations_by_user(id):
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 
-        query = "select * from reviews where u_id = %s"
+        query = "select * from reservations where u_id = %s"
         cursor.execute(query, (id,))
-        reviews = cursor.fetchall()
+        reservations = cursor.fetchall()
 
-        return jsonify(reviews), 200
+        return jsonify(reservations), 200
     except Exception as e:
         print(f"Exception caught: {e}")
         return jsonify({"msg": "Internal server error"}), 500
