@@ -21,6 +21,11 @@ export default function User() {
   const [age, setAge] = useState('');
   const [password, setPassword] = useState('');
 
+  // States for updating movies
+  const [movies, setMovies] = useState([]);
+  const [borrowing, setBorrowing] = useState([]);
+  const [reviews, setReviews] = useState([]);
+
   // States for password confirmation
   const [isPasswordConfirmed, setIsPasswordConfirmed] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -37,13 +42,13 @@ export default function User() {
           router.push('/');
         }, 1500);
       } else {
-        fetchUserData();
+        fetchData();
       }
     }
   }, [auth.loading, auth.isAuthenticated, router]);
 
-  // Async function to fetch user data
-  const fetchUserData = async () => {
+  // Async function to fetch all data
+  const fetchData = async () => {
     try {
       // Fetch current user's ID
       const idResponse = await axios.get(`/api/users/currid`, {
@@ -56,6 +61,21 @@ export default function User() {
         withCredentials: true,
       });
       setUserInfo(infoResponse.data);
+
+      const moviesResponse = await axios.get(`/api/movies`, {
+        withCredentials: true,
+      })
+      setMovies(moviesResponse.data);
+
+      const borrowingResponse = await axios.get(`/api/reservations/user/${userId}`, { 
+        withCredentials: true 
+      });
+      setBorrowing(borrowingResponse.data);
+
+      const reviewsResponse = await axios.get(`/api/reviews/user/${userId}`, {
+        withCredentials: true
+      });
+      setReviews(reviewsResponse.data);
     } catch (error) {
       console.error(error);
       setError('Failed to load user information.');
@@ -112,8 +132,7 @@ export default function User() {
       const csrfToken = Cookies.get('csrf_access_token');
 
       // Update user information
-      const response = await axios.post(
-        `/api/auth/update`,
+      const response = await axios.post(`/api/auth/update`,
         payload,
         {
           headers: { 'X-CSRF-TOKEN': csrfToken, },
@@ -122,7 +141,7 @@ export default function User() {
       );
 
       if (response.status === 200) {
-        fetchUserData();
+        fetchData();
         setUpdateProfile(false);
         setIsPasswordConfirmed(false);
         setPassword('');
@@ -319,18 +338,59 @@ export default function User() {
             )}
           </div>
           <div className="w-1/2 h-full flex flex-col items-center">
-            <div className="text-3xl mt-4 mb-6">
+            <div className="text-3xl mt-4 mb-6 pb-4 border-b-2 border-gray-400">
               Currently Borrowing
             </div>
-            <div className="w-4/5 border-gray-700 border-2 p-4 rounded-lg">
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Est exercitationem doloremque repudiandae omnis, corporis illo sapiente id ducimus atque consequuntur eum amet corrupti, distinctio dolorem consequatur veniam aspernatur dignissimos! Iste.
-            </div>
-            <div className="text-3xl mt-4 mb-6">
+            {borrowing.length > 0 ? (
+              borrowing.map((curr, index) => {
+                const movieName = movies.find(m => m.id === curr.m_id);
+                return (
+                  <div className="w-4/5 bg-gray-800 p-4 rounded shadow-md" key={`${userInfo.id}-${index}`}>
+                    <p>Movie: {movieName}</p>
+                    <p>Borrowed on: {curr.reservationDate}</p>
+                  </div>
+                )
+              })
+            ) : (
+              <p className="text-gray-400">Currently not borrowing any movies!</p>
+            )}
+            <div className="text-3xl mt-12 mb-6 pb-4 border-b-2 border-gray-400">
               Previously Borrowed
             </div>
-            <div className="w-4/5 border-gray-700 border-2 p-4 rounded-lg">
-              Lorem, ipsum dolor sit amet consectetur adipisicing elit. Est exercitationem doloremque repudiandae omnis, corporis illo sapiente id ducimus atque consequuntur eum amet corrupti, distinctio dolorem consequatur veniam aspernatur dignissimos! Iste.
-            </div>
+            {reviews.length > 0 ? (
+              reviews.map((review, index) => {
+                const movie = movies.find(m => m.id === review.m_id);
+                return (
+                  <div
+                    key={`${review.u_id}-${index}`}
+                    className="w-11/12 bg-gray-800 p-4 rounded shadow-md mb-4"
+                  >
+                    <p className="text-lg font-semibold mb-2">
+                      {movie ? movie.title : 'Unknown Movie'}
+                    </p>
+                    <div className="flex items-center mb-2">
+                      <span className="font-semibold mr-2">Rating:</span>
+                      {Array.from({ length: 5 }, (_, i) => (
+                        <svg
+                          key={i}
+                          className={`w-5 h-5 ${
+                            i < review.rating ? 'text-yellow-400' : 'text-gray-300'
+                          }`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.377 2.455a1 1 0 00-.364 1.118l1.286 3.967c.3.921-.755 1.688-1.54 1.118l-3.377-2.455a1 1 0 00-1.176 0l-3.377 2.455c-.785.57-1.84-.197-1.54-1.118l1.286-3.967a1 1 0 00-.364-1.118L2.98 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z" />
+                        </svg>
+                      ))}
+                    </div>
+                    <p className="text-gray-300">{review.review}</p>
+                  </div>
+                );
+              })
+            ) : (
+              <p className="text-gray-400">No movies borrowed yet!</p>
+            )}
           </div>
         </div>
       )}

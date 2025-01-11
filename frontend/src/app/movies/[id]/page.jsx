@@ -214,7 +214,6 @@ export default function MovieDetail() {
                       <p className="text-lg font-semibold mb-2">
                         {user ? user.name : 'Unknown User'}
                       </p>
-                      
                       <div className="flex items-center mb-2">
                         <span className="font-semibold mr-2">Rating:</span>
                         {Array.from({ length: 5 }, (_, i) => (
