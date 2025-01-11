@@ -3,8 +3,8 @@ const nextConfig = {
   async rewrites() {
     return [
       {
-        source: '/api/:path*',         // Match /api/... in the browser
-        destination: 'http://localhost:5000/:path*', // Proxy to Flask
+        source: '/api/:path*',                        // Match /api/... in browser
+        destination: 'http://localhost:5000/:path*',  // Proxy to Flask
       },
     ];
   },

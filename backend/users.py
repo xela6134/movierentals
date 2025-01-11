@@ -63,8 +63,9 @@ def get_user_by_id(id):
 @users_bp.route('/users/curruser', methods=['GET'])
 @jwt_required()
 def get_username():
-    current_user_id = get_jwt_identity()
     try:
+        current_user_id = get_jwt_identity()
+
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         cursor.execute("select name from users where id = %s", (current_user_id,))

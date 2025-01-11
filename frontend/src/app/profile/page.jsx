@@ -104,16 +104,12 @@ export default function User() {
 
     try {
       const payload = {
-        name: name || userInfo.name,  // Use existing name if not changed
-        age: age || userInfo.age,     // Use existing age if not changed
+        name: name,
+        age: age,
+        password: password
       };
 
-      if (password) {
-        payload.password = password; // Include password only if provided
-      }
-
       const csrfToken = Cookies.get('csrf_access_token');
-      console.log(csrfToken);
 
       // Update user information
       const response = await axios.post(
@@ -134,7 +130,7 @@ export default function User() {
       }
     } catch (err) {
       console.error(err);
-      setError('Failed to update profile. Please try again.');
+      setError(err.response.data.msg);
     }
   };
 

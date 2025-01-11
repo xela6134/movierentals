@@ -167,17 +167,19 @@ def validate():
 @auth_bp.route('/auth/update', methods=['POST'])
 @jwt_required()
 def update():
-    data = request.get_json()
-    name = data.get('name')
-    age = data.get('age')
-    password = data.get('password')
-
-    if not any([name, age, password]):
-        return jsonify({"msg": "At least one field (name, age, password) must be provided."}), 400
-
     try:
+        data = request.get_json()
+        name = data.get('name')
+        age = data.get('age')
+        password = data.get('password')
+
+        print(f"name: {name}, age: {age}, password: {password}")
+
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
+
+        if not any([name, age, password]):
+            return jsonify({"msg": "At least one field (name, age, password) must be provided."}), 400
 
         current_user_id = get_jwt_identity()
 
@@ -187,45 +189,33 @@ def update():
         if not user:
             return jsonify({"msg": "User not found."}), 404
 
-        # Prepare fields to update
-        update_fields = []
-        update_values = []
-
-        if name:
-            update_fields.append("name = %s")
-            update_values.append(name)
-
-        if age:
+        if age and age != '':
             try:
                 age = int(age)
                 if age <= 0 or age > 120:
                     return jsonify({"msg": "Age must be between 1 and 120."}), 400
-                update_fields.append("age = %s")
-                update_values.append(age)
             except ValueError:
                 return jsonify({"msg": "Age must be a valid number."}), 400
 
-        if password:
+        # Update queries
+        if name != None and name != '':
+            update_query = "update users set name = %s where id = %s"
+            cursor.execute(update_query, (name, current_user_id))
+        if age != None and age != '':
+            update_query = "update users set age = %s where id = %s"
+            age = int(age)
+            cursor.execute(update_query, (age, current_user_id))
+        if password != None and password != '':
+            update_query = "update users set password = %s where id = %s"
             hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
-            update_fields.append("password = %s")
-            update_values.append(hashed_password)
-
-        if not update_fields:
-            return jsonify({"msg": "No valid fields to update."}), 400
-
-        print(f"Fields: {update_fields}")
-
-        # update_query = f"update users set {', '.join(update_fields)} where id = %s"
-        # update_values.append(current_user_id)
+            cursor.execute(update_query, (hashed_password, current_user_id))
         
-        # cursor.execute(update_query, tuple(update_values))
-        # conn.commit()
+        conn.commit()
 
         return jsonify({"msg": "Profile updated successfully."}), 200
     except Exception as e:
         print(f"Exception caught: {e}")
         return jsonify({"msg": "Internal server error."}), 500
-
     finally:
         cursor.close()
         conn.close()

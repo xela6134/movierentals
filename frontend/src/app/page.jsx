@@ -11,8 +11,7 @@ export default function Root() {
 
   useEffect(() => {
     if (auth.isAuthenticated) {
-      axios
-        .get(`${process.env.NEXT_PUBLIC_API_URL}/users/curruser`, { withCredentials: true })
+      axios.get(`/api/users/curruser`, { withCredentials: true })
         .then((response) => {
           setUsername(response.data.username);
         })
