@@ -45,6 +45,28 @@ def get_reservations():
         cursor.close()
         conn.close()
 
+@reservations_bp.route('/reservations/curruser', methods=['GET'])
+@jwt_required()
+def get_current_reservations():
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor(dictionary=True)
+        
+        current_user_id = get_jwt_identity()
+
+        query = "select r.m_id, r.u_id, m.title from reservations r join movies m on r.m_id = m.id where r.u_id = %s"
+
+        cursor.execute(query, (current_user_id,))
+        reservations = cursor.fetchall()
+
+        return jsonify(reservations), 200
+    except Exception as e:
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal server error"}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
 @reservations_bp.route('/reservations/movie/<int:id>', methods=['GET'])
 @jwt_required()
 def get_reservations_by_movie(id):
@@ -107,16 +129,20 @@ def check_valid_reservation():
 def borrow():
     try:
         data = request.get_json()
-        movie_id = int(data.get('movie_id'))
+        movie_id = data.get('movie_id')
         current_user_id = get_jwt_identity()
         
         conn = get_db_connection()
         cursor = conn.cursor()
         
         # Some error handling
+        try:
+            movie_id = int(data.get('movie_id'))
+        except ValueError:
+            return jsonify({"msg": "Movie ID must be a valid number."}), 400
+        
         cursor.execute("select * from movies where id = %s", (movie_id,))
         movie = cursor.fetchone()
-        
         if not movie:
             return jsonify({"msg": "Movie not found."}), 404
         
@@ -125,10 +151,14 @@ def borrow():
             return jsonify({"msg": "No DVDs left."}), 400
 
         cursor.execute("select * from users where id = %s", (current_user_id,))
-        user = cursor.fetchone()
-        
+        user = cursor.fetchone()        
         if not user:
             return jsonify({"msg": "User not found"}), 404
+        
+        cursor.execute("select * from reservations where m_id = %s and u_id = %s", (movie_id, current_user_id))
+        curr = cursor.fetchone()
+        if curr:
+            return jsonify({"msg": "You are already borrowing this movie"}), 400
 
         # 1. Add value into reservations table
         current_date = datetime.utcnow()
@@ -138,6 +168,57 @@ def borrow():
         # 2. Update movies
         cursor.execute("update movies set copies = %s where id = %s", (copies - 1, movie_id))
         
+        conn.commit()
+        return jsonify({"msg": "Profile updated successfully."}), 200
+    except Exception as e:
+        print(f"Exception: {e}")
+        return jsonify({"msg": "Internal server error."}), 500
+    finally:
+        cursor.close()
+        conn.close()
+
+@reservations_bp.route('/reservations/return', methods=['POST'])
+@jwt_required()
+def return_dvd():
+    try:
+        data = request.get_json()
+        movie_id = int(data.get('movie_id'))
+        current_user_id = get_jwt_identity()
+        
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        
+        # Some error handling
+        try:
+            movie_id = int(data.get('movie_id'))
+        except ValueError:
+            return jsonify({"msg": "Movie ID must be a valid number."}), 400
+        
+        cursor.execute("select * from movies where id = %s", (movie_id,))
+        movie = cursor.fetchone()
+        if not movie:
+            return jsonify({"msg": "Movie not found."}), 404
+        
+        copies = movie[4]
+        if copies == 0:
+            return jsonify({"msg": "No DVDs left."}), 400
+
+        cursor.execute("select * from users where id = %s", (current_user_id,))
+        user = cursor.fetchone()
+        if not user:
+            return jsonify({"msg": "User not found"}), 404
+        
+        cursor.execute("select * from reservations where m_id = %s and u_id = %s", (movie_id, current_user_id))
+        curr = cursor.fetchone()
+        if not curr:
+            return jsonify({"msg": "You are not borrowing this movie"}), 400
+
+        # 1. Delete value from reservations table
+        cursor.execute("delete from reservations where m_id = %s and u_id = %s", (movie_id, current_user_id))
+
+        # 2. Update movies
+        cursor.execute("update movies set copies = %s where id = %s", (copies + 1, movie_id))
+
         conn.commit()
         return jsonify({"msg": "Profile updated successfully."}), 200
     except Exception as e:

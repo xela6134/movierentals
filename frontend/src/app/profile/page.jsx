@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import Cookies from 'js-cookie';
+import Link from 'next/link';
 
 export default function User() {
   const { auth } = useContext(AuthContext);
@@ -22,9 +23,9 @@ export default function User() {
   const [password, setPassword] = useState('');
 
   // States for updating movies
-  const [movies, setMovies] = useState([]);
-  const [borrowing, setBorrowing] = useState([]);
-  const [reviews, setReviews] = useState([]);
+  const [movies, setMovies] = useState(null);
+  const [borrowing, setBorrowing] = useState(null);
+  const [reviews, setReviews] = useState(null);
 
   // States for password confirmation
   const [isPasswordConfirmed, setIsPasswordConfirmed] = useState(false);
@@ -158,7 +159,7 @@ export default function User() {
       {!auth.loading && auth.isAuthenticated && (
         <div className="w-full h-screen flex">
           <div className="w-1/2 h-full flex flex-col items-center">
-            <div className="text-3xl mt-4 mb-6">Your Profile</div>
+            <div className="text-3xl mt-4 mb-6 pb-4 border-b-2 border-gray-400">Your Profile</div>
             {error && <div className="mb-4 text-red-600">{error}</div>}
             {userInfo ? (
               <div className="flex flex-row w-full">
@@ -198,7 +199,6 @@ export default function User() {
                       <strong>Suspension Status:</strong> <span className="text-green-400">Not Suspended</span>
                     </p>
                   )}
-
                   {!updateProfile && (
                     <button
                       className="w-2/5 bg-red-600 text-white px-3 py-1 rounded hover:bg-red-900"
@@ -207,7 +207,6 @@ export default function User() {
                       Update Profile
                     </button>
                   )}
-
                   {updateProfile && !isPasswordConfirmed && (
                     <div className="w-full">
                       <h2 className="text-2xl mb-4">Confirm Your Password</h2>
@@ -338,7 +337,10 @@ export default function User() {
             <div className="text-3xl mt-4 mb-6 pb-4 border-b-2 border-gray-400">
               Currently Borrowing
             </div>
-            {borrowing.length > 0 ? (
+            {borrowing === null && (
+              <p className="text-gray-400">Loading data...</p>
+            )}
+            {(borrowing !== null && borrowing.length > 0) && (
               borrowing.map((curr, index) => {
                 const movie = movies.find(m => m.id === curr.m_id);
                 const date = new Date(curr.reservation_date);
@@ -350,17 +352,27 @@ export default function User() {
                 return (
                   <div className="w-11/12 bg-gray-800 p-4 rounded shadow-md mb-4" key={`${userInfo.id}-${index}`}>
                     <p className="text-lg font-semibold mb-2">{movie ? movie.title : 'Unknown Movie'}</p>
-                    <p>Borrowed on: {formattedDate}</p>
+                    <p className="mb-4">Borrowed on: {formattedDate}</p>
+                    <Link 
+                      href={`/return`}
+                      className="bg-gray-600 text-white px-3 py-1 rounded hover:bg-gray-900"
+                    >
+                      Return
+                    </Link>
                   </div>
                 )
               })
-            ) : (
+            )}
+            {(borrowing !== null && borrowing.length === 0) && (
               <p className="text-gray-400">Currently not borrowing any movies!</p>
             )}
             <div className="text-3xl mt-12 mb-6 pb-4 border-b-2 border-gray-400">
               Previously Borrowed
             </div>
-            {reviews.length > 0 ? (
+            {reviews === null && (
+              <p className="text-gray-400">Loading data...</p>
+            )}
+            {(reviews !== null && reviews.length > 0) && (
               reviews.map((review, index) => {
                 const movie = movies.find(m => m.id === review.m_id);
                 return (
@@ -391,7 +403,8 @@ export default function User() {
                   </div>
                 );
               })
-            ) : (
+            )}
+            {(reviews !== null && reviews.length === 0) && (
               <p className="text-gray-400">No movies borrowed yet!</p>
             )}
           </div>

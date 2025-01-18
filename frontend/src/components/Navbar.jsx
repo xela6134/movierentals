@@ -58,6 +58,9 @@ export default function NavBar() {
             <Link href="/borrow" className="text-white hover:text-red-600">
               Borrow
             </Link>
+            <Link href="/return" className="text-white hover:text-red-600">
+              Return
+            </Link>
             <Link href="/profile" className="text-white hover:text-red-600">
               Profile
             </Link>
