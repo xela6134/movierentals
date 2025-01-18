@@ -173,8 +173,6 @@ def update():
         age = data.get('age')
         password = data.get('password')
 
-        print(f"name: {name}, age: {age}, password: {password}")
-
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
 

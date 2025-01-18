@@ -66,7 +66,7 @@ def get_movie_by_id(id):
 
         cursor.execute("select * from movies where id = %s", (id,))
         movie = cursor.fetchone()
-        
+
         if movie:
             return jsonify(movie), 200
         else:

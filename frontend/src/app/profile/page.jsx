@@ -79,9 +79,6 @@ export default function User() {
     } catch (error) {
       console.error(error);
       setError('Failed to load user information.');
-      setTimeout(() => {
-        router.push('/');
-      }, 1500);
     }
   };
 
@@ -337,17 +334,23 @@ export default function User() {
               <div>Loading your information...</div>
             )}
           </div>
-          <div className="w-1/2 h-full flex flex-col items-center">
+          <div className="w-1/2 flex flex-col items-center">
             <div className="text-3xl mt-4 mb-6 pb-4 border-b-2 border-gray-400">
               Currently Borrowing
             </div>
             {borrowing.length > 0 ? (
               borrowing.map((curr, index) => {
-                const movieName = movies.find(m => m.id === curr.m_id);
+                const movie = movies.find(m => m.id === curr.m_id);
+                const date = new Date(curr.reservation_date);
+
+                const day = date.getDate();
+                const month = date.toLocaleString('en-US', { month: 'short' });
+                const year = date.getFullYear();
+                const formattedDate = `${day} ${month} ${year}`;
                 return (
-                  <div className="w-4/5 bg-gray-800 p-4 rounded shadow-md" key={`${userInfo.id}-${index}`}>
-                    <p>Movie: {movieName}</p>
-                    <p>Borrowed on: {curr.reservationDate}</p>
+                  <div className="w-11/12 bg-gray-800 p-4 rounded shadow-md mb-4" key={`${userInfo.id}-${index}`}>
+                    <p className="text-lg font-semibold mb-2">{movie ? movie.title : 'Unknown Movie'}</p>
+                    <p>Borrowed on: {formattedDate}</p>
                   </div>
                 )
               })
