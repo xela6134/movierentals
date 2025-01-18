@@ -168,7 +168,7 @@ export default function User() {
                   <img
                     src="/images/default_user.jpg"
                     alt="User Image"
-                    className="w-3/5 h-auto rounded-full"
+                    className="w-3/5 h-auto rounded-full max-w-32 max-h-32"
                   />
                 </div>
                 <div className="w-1/2 p-4 text-white text-xl flex flex-col gap-6">

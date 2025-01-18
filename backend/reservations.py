@@ -23,6 +23,12 @@ insert into reservations
 values (%s, %s, %s)
 """
 
+add_reviews_query = """
+insert into reviews
+(m_id, u_id, rating, review)
+values (%s, %s, %s, %s)
+"""
+
 def get_db_connection():
     return mysql.connector.connect(**config)
 
@@ -182,7 +188,9 @@ def borrow():
 def return_dvd():
     try:
         data = request.get_json()
-        movie_id = int(data.get('movie_id'))
+        movie_id = data.get('movie_id')
+        rating = data.get('rating')
+        review = data.get('review')
         current_user_id = get_jwt_identity()
         
         conn = get_db_connection()
@@ -190,10 +198,17 @@ def return_dvd():
         
         # Some error handling
         try:
-            movie_id = int(data.get('movie_id'))
+            movie_id = int(movie_id)
+            rating = int(rating)
         except ValueError:
             return jsonify({"msg": "Movie ID must be a valid number."}), 400
+
+        if rating < 1 or rating > 5:
+            return jsonify({"msg": "Rating must be a number between 1 and 5."}), 400
         
+        if len(review.strip()) == 0:
+            return jsonify({"msg": "Enter a valid string"}), 400
+
         cursor.execute("select * from movies where id = %s", (movie_id,))
         movie = cursor.fetchone()
         if not movie:
@@ -219,10 +234,15 @@ def return_dvd():
         # 2. Update movies
         cursor.execute("update movies set copies = %s where id = %s", (copies + 1, movie_id))
 
+        # 3. Add reviews
+        cursor.execute(add_reviews_query, (movie_id, current_user_id, rating, review))
+
+        print(f"{rating}: {review}")
         conn.commit()
         return jsonify({"msg": "Profile updated successfully."}), 200
     except Exception as e:
         print(f"Exception: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error."}), 500
     finally:
         cursor.close()

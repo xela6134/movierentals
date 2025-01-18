@@ -6,20 +6,17 @@ import { AuthContext } from '@/components/AuthContext';
 import axios from 'axios';
 
 export default function Root() {
-  const { auth, setAuth } = useContext(AuthContext);
-  const [username, setUsername] = useState('');
+  const { auth } = useContext(AuthContext);
 
   useEffect(() => {
-    if (auth.isAuthenticated) {
-      axios.get(`/api/users/curruser`, { withCredentials: true })
-        .then((response) => {
-          setUsername(response.data.username);
-        })
-        .catch((error) => {
-          console.error(error);
-        });
+    if (!auth.loading && auth.isAuthenticated) {
+      fetchData();
     }
-  }, [auth.isAuthenticated]);
+  }, [auth.loading, auth.isAuthenticated]);
+
+  const fetchData = async () => {
+    
+  };
 
   return (
     <div className="h-[calc(100vh-80px)] flex items-center justify-center default-background">
@@ -27,10 +24,10 @@ export default function Root() {
         <h1 className="text-3xl text-white text-center">Welcome!</h1>
         <br />
         {!auth.loading && !auth.isAuthenticated && (
-          <p className="text-white">Login or Register to borrow our variety of DVDs.</p>
+          <p className="text-white text-center">Login or Register to borrow our variety of DVDs.</p>
         )}
         {!auth.loading && auth.isAuthenticated && (
-          <p className="text-white">What would you like to do today, {username}?</p>
+          <p className="text-white text-center">Whats up</p>
         )}
       </div>
     </div>

@@ -15,6 +15,10 @@ export default function Return() {
   const [selectedMovie, setSelectedMovie] = useState('');
   const [selectedMovieTitle, setSelectedMovieTitle] = useState('');
 
+  const [rating, setRating] = useState(3);
+  const [hoverRating, setHoverRating] = useState(0); // For hover effect
+  const [review, setReview] = useState('');
+
   useEffect(() => {
     if (!auth.loading) {
       if (!auth.isAuthenticated) {
@@ -52,17 +56,26 @@ export default function Return() {
     }
   };
 
-  const handleReturn = async () => {
+  const handleReturn = async (e) => {
     try {
+      e.preventDefault();
+
+      if (!review.trim()) {
+        setError('Please write a review before returning the movie.');
+        return;
+      }
+
       const payload = {
-        movie_id: selectedMovie
+        movie_id: selectedMovie,
+        rating: rating,
+        review: review
       };
 
       const csrfToken = Cookies.get('csrf_access_token');
       const returnResponse = await axios.post(`/api/reservations/return`,
         payload,
         {
-          headers: { 'X-CSRF-TOKEN': csrfToken, },
+          headers: { 'X-CSRF-TOKEN': csrfToken },
           withCredentials: true,
         }
       );
@@ -70,10 +83,16 @@ export default function Return() {
       if (returnResponse.status === 200) {
         fetchData();
         alert('Movie returned successfully!');
+        setSelectedMovie('');
+        setSelectedMovieTitle('');
+        setRating(3);
+        setReview('');
+        setHoverRating(0);
+        setError('');
       }
     } catch (error) {
       console.error(error);
-      setError(error.response.data.msg);
+      setError(error.response?.data?.msg || 'An error occurred while returning the movie.');
     }
   };
 
@@ -83,7 +102,7 @@ export default function Return() {
         <div>You have not logged in. Redirecting to home page...</div>
       )}
       {!auth.loading && auth.isAuthenticated && (
-        <div className="border-2 border-gray-700 mt-12 rounded-lg">
+        <div className="border-2 border-gray-700 mt-12 rounded-lg w-full max-w-md">
           {borrowing === null && (
             <p className="p-6">Loading data...</p>
           )}
@@ -95,7 +114,7 @@ export default function Return() {
               {error && <div className="text-red-400 my-4">{error}</div>}
               <label 
                 htmlFor="movie-select" 
-                className="mb-2 text-white"
+                className="mb-2 text-white block"
               >
                 Select a movie to return:
               </label>
@@ -114,13 +133,50 @@ export default function Return() {
               </select>
               {selectedMovie && (
                 <>
-                  <p className="mt-4">Are you sure you want to return {selectedMovieTitle}?</p>
-                  <button 
-                    className="bg-green-600 mt-2 px-3 py-1 rounded hover:bg-green-900"
-                    onClick={handleReturn}
-                  >
-                    Return
-                  </button>
+                  <p className="mt-4">Leave a review before returning {selectedMovieTitle}!</p>
+                  <form onSubmit={handleReturn} className="mt-4">
+                    <div className="flex items-center mb-4">
+                      <span className="mr-2">Rating:</span>
+                      {[...Array(5)].map((star, index) => {
+                        const starValue = index + 1;
+                        return (
+                          <svg
+                            key={index}
+                            className={`w-6 h-6 cursor-pointer ${
+                              starValue <= (hoverRating || rating) ? 'text-yellow-400' : 'text-gray-300'
+                            }`}
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                            xmlns="http://www.w3.org/2000/svg"
+                            onClick={() => setRating(starValue)}
+                            onMouseEnter={() => setHoverRating(starValue)}
+                            onMouseLeave={() => setHoverRating(0)}
+                          >
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.377 2.455a1 1 0 00-.364 1.118l1.286 3.967c.3.921-.755 1.688-1.54 1.118l-3.377-2.455a1 1 0 00-1.176 0l-3.377 2.455c-.785.57-1.84-.197-1.54-1.118l1.286-3.967a1 1 0 00-.364-1.118L2.98 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z" />
+                          </svg>
+                        );
+                      })}
+                    </div>
+
+                    <label htmlFor="review" className="block mb-2">
+                      Review:
+                    </label>
+                    <textarea
+                      id="review"
+                      value={review}
+                      onChange={(e) => setReview(e.target.value)}
+                      className="w-full p-2 rounded focus:outline-none text-black resize-none h-24"
+                      placeholder="Write your review here..."
+                      required
+                    />
+
+                    <button 
+                      type="submit"
+                      className="bg-green-600 mt-4 px-4 py-2 rounded hover:bg-green-900 w-full"
+                    >
+                      Return
+                    </button>
+                  </form>
                 </>
               )}
             </div>
