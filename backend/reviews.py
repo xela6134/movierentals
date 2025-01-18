@@ -33,6 +33,7 @@ def get_reviews():
         return jsonify(reviews), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
@@ -52,6 +53,7 @@ def get_reviews_by_movie(id):
         return jsonify(reviews), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
@@ -71,6 +73,7 @@ def get_reviews_by_user(id):
         return jsonify(reviews), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()

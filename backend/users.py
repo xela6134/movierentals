@@ -33,6 +33,7 @@ def get_users():
         return jsonify(users), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error."}), 500
     finally:
         cursor.close()
@@ -55,6 +56,7 @@ def get_user_by_id(id):
             return jsonify({"msg": f"User with id {id} not found."}), 404
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error."}), 500
     finally:
         cursor.close()
@@ -75,6 +77,7 @@ def get_username():
         return jsonify({"username": user['name']}), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error."}), 500
     finally:
         cursor.close()

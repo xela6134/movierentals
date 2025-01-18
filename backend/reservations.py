@@ -46,6 +46,7 @@ def get_reservations():
         return jsonify(reservations), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
@@ -68,6 +69,7 @@ def get_current_reservations():
         return jsonify(reservations), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
@@ -87,6 +89,7 @@ def get_reservations_by_movie(id):
         return jsonify(reservations), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
@@ -106,6 +109,7 @@ def get_reservations_by_user(id):
         return jsonify(reservations), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
@@ -128,7 +132,11 @@ def check_valid_reservation():
         return jsonify(reservations), 200
     except Exception as e:
         print(f"Exception: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error."}), 500
+    finally:
+        cursor.close()
+        conn.close()
 
 @reservations_bp.route('/reservations/borrow', methods=['POST'])
 @jwt_required()
@@ -178,6 +186,7 @@ def borrow():
         return jsonify({"msg": "Profile updated successfully."}), 200
     except Exception as e:
         print(f"Exception: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error."}), 500
     finally:
         cursor.close()

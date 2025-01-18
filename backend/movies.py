@@ -33,6 +33,7 @@ def get_movies():
         return jsonify(movies), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
@@ -52,6 +53,7 @@ def get_movie_posters():
         return jsonify(movies), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
@@ -73,6 +75,7 @@ def get_movie_by_id(id):
             return jsonify({"msg": f"Movie with id {id} not found."}), 404
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()
@@ -94,6 +97,7 @@ def get_movie_poster_by_id(id):
             return jsonify({"msg": f"Movie poster with id {id} not found."}), 404
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error"}), 500
     finally:
         cursor.close()

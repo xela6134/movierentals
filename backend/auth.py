@@ -71,8 +71,8 @@ def register():
         return jsonify({"msg": "Registration successful."}), 201
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error."}), 500
-
     finally:
         cursor.close()
         conn.close()
@@ -107,11 +107,10 @@ def login():
         set_access_cookies(response, access_token)
 
         return response, 200
-
     except Exception as e:
         print(f"Exception: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error."}), 500
-
     finally:
         cursor.close()
         conn.close()
@@ -131,6 +130,7 @@ def auth_status():
         return jsonify({"authenticated": True, "user": user}), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"authenticated": False, "msg": "Internal server error."}), 500
     finally:
         cursor.close()
@@ -159,6 +159,7 @@ def validate():
             return jsonify({"msg": "Invalid password."}), 401
     except Exception as e:
         print(f"Exception: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error."}), 500
     finally:
         cursor.close()
@@ -213,6 +214,7 @@ def update():
         return jsonify({"msg": "Profile updated successfully."}), 200
     except Exception as e:
         print(f"Exception caught: {e}")
+        conn.rollback()
         return jsonify({"msg": "Internal server error."}), 500
     finally:
         cursor.close()
