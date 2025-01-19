@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 import pandas
 import mysql.connector
 import os
+from collections import Counter
 
 load_dotenv()
 
@@ -65,22 +66,51 @@ def main():
     posters_data = posters_data.where(pandas.notnull(posters_data), None)
     posters_tuples = list(posters_data.itertuples(index=False, name=None))
 
+    movie_count = Counter()
+    genre_count = Counter()
+
+    for data in genres_tuples:
+        movie_count[data[0]] += 1
+        genre_count[data[1]] += 1
+
+    print("Number of genres per movie:")
+    for movie_id, count in movie_count.items():
+        print(f"Movie ID {movie_id}: {count} genres")
+
+    genre_sorted = genre_count.most_common()
+    print("\nNumber of movies per genre:")
+    for genre, count in genre_sorted:
+        print(f"Genre '{genre}': {count} movies")
+
+
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
 
-        link = 'https://m.media-amazon.com/images/M/MV5BYjk1Y2U4MjQtY2ZiNS00OWQyLWI3MmYtZWUwNmRjYWRiNWNhXkEyXkFqcGc@._V1_SX300.jpg'
-        cursor.execute('update movie_posters set img = %s where id = 17', (link,))
-        conn.commit()
-
-        # cursor.executemany(add_posters_query, posters_tuples)
-        # conn.commit()
+        cursor.execute("select * from genres")
+        result = cursor.fetchall()
+        for row in result:
+            print(row)
     except mysql.connector.Error as err:
         print(f"add posters error: {err}")
         conn.rollback()
     finally:
         cursor.close()
         conn.close()
+
+    # try:
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
+
+    #     cursor.execute("delete from genres")
+    #     cursor.executemany(add_genres_query, genres_tuples)
+    #     conn.commit()
+    # except mysql.connector.Error as err:
+    #     print(f"add posters error: {err}")
+    #     conn.rollback()
+    # finally:
+    #     cursor.close()
+    #     conn.close()
     
     # try:
     #     conn = get_db_connection()
