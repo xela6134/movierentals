@@ -51,7 +51,7 @@ export default function MovieDetail() {
 
   // Fetches poster about current movie
   const fetchPoster = () => {
-    axios.get(`/api/movie_posters/${movieId}`, { withCredentials: true })
+    axios.get(`/api/movies/poster/${movieId}`, { withCredentials: true })
       .then((response) => {
         const data = response.data;
         setPoster(data.img);

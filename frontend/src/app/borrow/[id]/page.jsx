@@ -4,6 +4,7 @@
 import { AuthContext } from '@/components/AuthContext';
 import axios from 'axios';
 import Cookies from 'js-cookie';
+import Link from 'next/link';
 import { useParams, useRouter } from 'next/navigation';
 import React, { useContext, useEffect, useState } from 'react';
 
@@ -15,7 +16,9 @@ export default function BorrowSpecific() {
   const [error, setError] = useState('');
 
   const [movieInfo, setMovieInfo] = useState(null);
-  const [reservationInfo, setReservationInfo] = useState(null);
+  const [poster, setPoster] = useState();
+  const [reservationInfo, setReservationInfo] = useState([]);
+  const [reviewInfo, setReviewInfo] = useState([]);
   const [reservationLoaded, setReservationLoaded] = useState(false);
 
   useEffect(() => {
@@ -36,6 +39,17 @@ export default function BorrowSpecific() {
         withCredentials: true
       });
       setMovieInfo(movieResponse.data);
+
+      const posterResponse = await axios.get(`/api/movies/poster/${movieId}`, {
+        withCredentials: true
+      });
+      setPoster(posterResponse.data.img);
+
+      const reviewResponse = await axios.get(`/api/reviews/specific`, {
+        withCredentials: true,
+        params: { movie_id: movieId },
+      });
+      setReviewInfo(reviewResponse.data);
 
       const reservationResponse = await axios.get(`/api/reservations/validity`, {
         withCredentials: true,
@@ -81,7 +95,7 @@ export default function BorrowSpecific() {
         <div>You have not logged in. Redirecting to home page...</div>
       )}
       {!auth.loading && auth.isAuthenticated && (
-        <div className="border-2 border-gray-700 mt-12 p-6 rounded-lg">
+        <div className="border-2 border-gray-700 mt-12 p-6 rounded-lg max-w-[480px]">
           {error && <p className="mb-4 text-red-600">{error}</p>}
           {(!movieInfo || !reservationLoaded) && (
             <p>Loading reservation info...</p>
@@ -89,6 +103,21 @@ export default function BorrowSpecific() {
           {movieInfo && reservationLoaded && (
             <>
               <p className="text-lg mb-4">Reservation Information for {movieInfo.title}</p>
+              <div className="flex justify-center items-center">
+                {poster ? (
+                  <img
+                    src={poster}
+                    alt="Poster"
+                    className="w-3/5 h-auto object-cover m-4 rounded"
+                  />
+                ) : (
+                  <img
+                    src="/images/default_movie.jpg"
+                    alt="No Image Available"
+                    className="w-3/5 h-auto object-cover m-4 rounded opacity-50"
+                  />
+                )}
+              </div>
               <ul>
                 {movieInfo.copies !== 0 ? (
                   <li>✔️ Copies left: {movieInfo.copies}</li>
@@ -110,6 +139,23 @@ export default function BorrowSpecific() {
                   >
                     Borrow
                   </button>
+                  <p className="mt-4">
+                    Still not sure? Click&nbsp;
+                    <Link 
+                      href={`/movies/${movieId}`} 
+                      className="text-red-600 hover:text-red-900 cursor-pointer"
+                    >
+                      here
+                    </Link>
+                    &nbsp;for more information.
+                  </p>
+                  {reviewInfo.length > 0 && (
+                    <>
+                      <br />
+                      <p>⚠️ You have already submitted a review for this review.</p>
+                      <p>⚠️ Borrowing this movie again will only modify your existing review.</p>
+                    </>
+                  )}
                 </>
               ): (
                 <p className="mt-4 text-red-600">Unable to borrow this movie!</p>

@@ -12,6 +12,7 @@ export default function Return() {
 
   const [error, setError] = useState('');
   const [borrowing, setBorrowing] = useState(null);
+  const [userReviews, setUserReviews] = useState([]);
   const [selectedMovie, setSelectedMovie] = useState('');
   const [selectedMovieTitle, setSelectedMovieTitle] = useState('');
 
@@ -37,6 +38,11 @@ export default function Return() {
         withCredentials: true 
       });
       setBorrowing(borrowingResponse.data);
+
+      const userReviewResponse = await axios.get(`/api/reviews/curruser`, {
+        withCredentials: true
+      });
+      setUserReviews(userReviewResponse.data);
     } catch (error) {
       console.error(error);
       setError(error.response?.data?.msg || 'An error occurred');
@@ -96,6 +102,8 @@ export default function Return() {
     }
   };
 
+  const existingReview = userReviews.find(review => review.m_id == selectedMovie);
+
   return (
     <div className="flex items-center w-full justify-start flex-col default-background text-white p-4">
       {!auth.loading && !auth.isAuthenticated && (
@@ -104,10 +112,10 @@ export default function Return() {
       {!auth.loading && auth.isAuthenticated && (
         <div className="border-2 border-gray-700 mt-12 rounded-lg w-full max-w-md">
           {borrowing === null && (
-            <p className="p-6">Loading data...</p>
+            <p className="p-6 text-center">Loading data...</p>
           )}
           {borrowing !== null && borrowing.length === 0 && (
-            <p className="p-6">No movies to return!</p>
+            <p className="p-6 text-center">No movies to return!</p>
           )}
           {borrowing !== null && borrowing.length !== 0 && (
             <div className="p-6">
@@ -135,7 +143,28 @@ export default function Return() {
                 <>
                   <p className="mt-4">Leave a review before returning {selectedMovieTitle}!</p>
                   <form onSubmit={handleReturn} className="mt-4">
-                    <div className="flex items-center mb-4">
+                    {existingReview && (
+                      <div className="border-2 border-gray-400 p-2">
+                        <p>⚠️ You have already submitted a review for this movie. <span className="text-yellow-400">Writing this review will overwrite your existing review</span>:</p>
+                        <div className="flex justify-center items-center my-2">
+                          {Array.from({ length: 5 }, (_, i) => (
+                            <svg
+                              key={i}
+                              className={`w-5 h-5 ${
+                                i < existingReview.rating ? 'text-yellow-400' : 'text-gray-300'
+                              }`}
+                              fill="currentColor"
+                              viewBox="0 0 20 20"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.967a1 1 0 00.95.69h4.175c.969 0 1.371 1.24.588 1.81l-3.377 2.455a1 1 0 00-.364 1.118l1.286 3.967c.3.921-.755 1.688-1.54 1.118l-3.377-2.455a1 1 0 00-1.176 0l-3.377 2.455c-.785.57-1.84-.197-1.54-1.118l1.286-3.967a1 1 0 00-.364-1.118L2.98 9.394c-.783-.57-.38-1.81.588-1.81h4.175a1 1 0 00.95-.69l1.286-3.967z" />
+                            </svg>
+                          ))}
+                        </div>
+                        <p>"{existingReview.review}"</p>
+                      </div>
+                    )}
+                    <div className="flex items-center mt-2">
                       <span className="mr-2">Rating:</span>
                       {[...Array(5)].map((star, index) => {
                         const starValue = index + 1;
@@ -157,8 +186,7 @@ export default function Return() {
                         );
                       })}
                     </div>
-
-                    <label htmlFor="review" className="block mb-2">
+                    <label htmlFor="review" className="block my-2">
                       Review:
                     </label>
                     <textarea
@@ -169,7 +197,6 @@ export default function Return() {
                       placeholder="Write your review here..."
                       required
                     />
-
                     <button 
                       type="submit"
                       className="bg-green-600 mt-4 px-4 py-2 rounded hover:bg-green-900 w-full"

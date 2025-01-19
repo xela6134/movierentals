@@ -29,6 +29,12 @@ insert into reviews
 values (%s, %s, %s, %s)
 """
 
+update_reviews_query = """
+update reviews
+set rating = %s, review = %s
+where m_id = %s and u_id = %s
+"""
+
 def get_db_connection():
     return mysql.connector.connect(**config)
 
@@ -244,9 +250,15 @@ def return_dvd():
         cursor.execute("update movies set copies = %s where id = %s", (copies + 1, movie_id))
 
         # 3. Add reviews
-        cursor.execute(add_reviews_query, (movie_id, current_user_id, rating, review))
+        cursor.execute("select * from reviews where m_id = %s and u_id = %s", (movie_id, current_user_id))
+        result = cursor.fetchone()
+        if not result:
+            # 3-1. Add reviews - if review does not exist
+            cursor.execute(add_reviews_query, (movie_id, current_user_id, rating, review))
+        else:
+            # 3-2. Update reviews - if review already exists
+            cursor.execute(update_reviews_query, (rating, review, movie_id, current_user_id))
 
-        print(f"{rating}: {review}")
         conn.commit()
         return jsonify({"msg": "Profile updated successfully."}), 200
     except Exception as e:

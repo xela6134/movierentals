@@ -42,7 +42,7 @@ export default function Movies() {
   };
 
   const fetchPosters = () => {
-    axios.get(`/api/movie_posters`, { withCredentials: true })
+    axios.get(`/api/movies/poster`, { withCredentials: true })
       .then((response) => {
         setPosters(response.data);
       })

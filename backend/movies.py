@@ -39,7 +39,7 @@ def get_movies():
         cursor.close()
         conn.close()
 
-@movies_bp.route('/movie_posters', methods=['GET'])
+@movies_bp.route('/movies/poster', methods=['GET'])
 @jwt_required()
 def get_movie_posters():
     try:
@@ -58,6 +58,8 @@ def get_movie_posters():
     finally:
         cursor.close()
         conn.close()
+
+@movies_bp.route('/')
 
 @movies_bp.route('/movies/<int:id>', methods=['GET'])
 @jwt_required()
@@ -81,7 +83,7 @@ def get_movie_by_id(id):
         cursor.close()
         conn.close()
 
-@movies_bp.route('/movie_posters/<int:id>', methods=['GET'])
+@movies_bp.route('/movies/poster/<int:id>', methods=['GET'])
 @jwt_required()
 def get_movie_poster_by_id(id):
     try:
