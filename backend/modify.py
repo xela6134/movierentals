@@ -59,44 +59,92 @@ def main():
     reviews_data = pandas.read_csv('admin/reviews.csv')
     reviews_tuples = list(reviews_data.itertuples(index=False, name=None))
 
-    genres_data = pandas.read_csv('admin/genres.csv')
-    genres_tuples = list(genres_data.itertuples(index=False, name=None))
+    # genres_data = pandas.read_csv('admin/genres.csv')
+    # genres_tuples = list(genres_data.itertuples(index=False, name=None))
     
     posters_data = pandas.read_csv('admin/posters.csv')
     posters_data = posters_data.where(pandas.notnull(posters_data), None)
     posters_tuples = list(posters_data.itertuples(index=False, name=None))
 
-    movie_count = Counter()
-    genre_count = Counter()
+    # movie_count = Counter()
+    # genre_count = Counter()
 
-    for data in genres_tuples:
-        movie_count[data[0]] += 1
-        genre_count[data[1]] += 1
+    # for data in genres_tuples:
+    #     movie_count[data[0]] += 1
+    #     genre_count[data[1]] += 1
 
-    print("Number of genres per movie:")
-    for movie_id, count in movie_count.items():
-        print(f"Movie ID {movie_id}: {count} genres")
+    # print("Number of genres per movie:")
+    # for movie_id, count in movie_count.items():
+    #     print(f"Movie ID {movie_id}: {count} genres")
 
-    genre_sorted = genre_count.most_common()
-    print("\nNumber of movies per genre:")
-    for genre, count in genre_sorted:
-        print(f"Genre '{genre}': {count} movies")
-
-
+    # genre_sorted = genre_count.most_common()
+    # print("\nNumber of movies per genre:")
+    # for genre, count in genre_sorted:
+    #     print(f"Genre '{genre}': {count} movies")
+    
+    genres_old_data = pandas.read_csv('admin/genres_old.csv')
+    genres_old_tuples = list(genres_old_data.itertuples(index=False, name=None))
+    
+    genres_new_data = pandas.read_csv('admin/genres_new.csv')
+    genres_new_tuples = list(genres_new_data.itertuples(index=False, name=None))
+    
+    # genre_old_count = Counter()
+    # genre_new_count = Counter()
+    
+    # for data in genres_old_tuples:
+    #     genre_old_count[data[1]] += 1
+    
+    # for data in genres_new_tuples:
+    #     genre_new_count[data[1]] += 1
+    
+    # genre_old_sorted = genre_old_count.most_common()
+    # print("\nNumber of movies per genre (old):")
+    # for genre, count in genre_old_sorted:
+    #     print(f"Genre '{genre}': {count} movies")
+        
+    # genre_new_sorted = genre_new_count.most_common()
+    # print("\nNumber of movies per genre (new):")
+    # for genre, count in genre_new_sorted:
+    #     print(f"Genre '{genre}': {count} movies")
+        
     try:
         conn = get_db_connection()
         cursor = conn.cursor()
-
+        
         cursor.execute("select * from genres")
         result = cursor.fetchall()
         for row in result:
             print(row)
-    except mysql.connector.Error as err:
-        print(f"add posters error: {err}")
-        conn.rollback()
+        
+        # cursor.execute("delete from genres")
+        # cursor.executemany(add_genres_query, genres_old_tuples)
+        # conn.commit()
+    except mysql.connector.Error as e:
+        print(f"posters error: {e}")
     finally:
         cursor.close()
         conn.close()
+
+    # try:
+    #     conn = get_db_connection()
+    #     cursor = conn.cursor()
+
+    #     cursor.execute("select * from movies")
+    #     result = cursor.fetchall()
+        
+    #     with open('admin/new_movies.csv', 'a') as outfile:
+    #         for row in result:
+    #             if ',' in row[1]:
+    #                 outfile.write(f'{row[0]},"{row[1]}",{row[2]},{row[3]},{row[4]}\n')
+    #             else:
+    #                 outfile.write(f'{row[0]},{row[1]},{row[2]},{row[3]},{row[4]}\n')
+        
+    # except mysql.connector.Error as err:
+    #     print(f"add posters error: {err}")
+    #     conn.rollback()
+    # finally:
+    #     cursor.close()
+    #     conn.close()
 
     # try:
     #     conn = get_db_connection()
