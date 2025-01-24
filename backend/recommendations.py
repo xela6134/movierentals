@@ -30,7 +30,7 @@ def get_db_connection():
 
 def fetch_reviews_and_genres():
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
+    cursor = conn.cursor()
 
     cursor.execute("select m_id, u_id, rating from reviews")
     reviews_data = cursor.fetchall()
@@ -45,6 +45,28 @@ def fetch_reviews_and_genres():
 
     return reviews_df, genres_df
 
+def fetch_relevant_movie_data(recommended_ids):
+    if not recommended_ids:
+        return [], []
+
+    conn = get_db_connection()
+    cursor = conn.cursor()
+
+    placeholders = ','.join(['%s'] * len(recommended_ids))
+    
+    sql_query = f"""
+    select m.id, m.title, mp.img
+    from movies m
+    join movie_posters mp on m.id = mp.id
+    where m.id in ({placeholders})
+    """
+    cursor.execute(sql_query, recommended_ids)
+    movie_data = cursor.fetchall()
+
+    cursor.close()
+    conn.close()
+
+    return movie_data
 
 def build_user_item_matrix(reviews_df):
     """
@@ -205,46 +227,54 @@ def genre_similarity(user_id, reviews_df, genres_df, top_n=5):
     recommended_movie_ids = to_recommend.index.tolist()
     return recommended_movie_ids
 
+############
+## Routes ##
+############
+
+# Recommends movies based on similar user's preferences
 @recommendations_bp.route('/recommendations/user-cf', methods=['GET'])
 @jwt_required()
 def get_user_based_cf():
     user_id = get_jwt_identity()
     reviews_df, _ = fetch_reviews_and_genres()
 
-    recommended_ids = user_based_cf(user_id, reviews_df, top_n=5)
+    recommended_ids = user_based_cf(user_id, reviews_df, top_n=7)    
+    recommended_movies = fetch_relevant_movie_data(recommended_ids)
+    print(recommended_movies)
 
     return jsonify({
         "user_id": user_id,
-        "recommendations": recommended_ids
+        "recommendations": recommended_movies
     }), 200
 
-
-@recommendations_bp.route('/recommendations/item-cf', methods=['GET'])
+# Recommends movies based on user's current preference (rating >= 4)
+@recommendations_bp.route('/recommendations/movie-cf', methods=['GET'])
 @jwt_required()
 def get_item_based_cf():
     user_id = get_jwt_identity()
     reviews_df, _ = fetch_reviews_and_genres()
 
-    recommended_ids = item_based_cf(user_id, reviews_df, top_n=5)
+    recommended_ids = item_based_cf(user_id, reviews_df, top_n=7)
+    recommended_movies = fetch_relevant_movie_data(recommended_ids)
+    print(recommended_movies)
 
     return jsonify({
         "user_id": user_id,
-        "recommendations": recommended_ids
+        "recommendations": recommended_movies
     }), 200
 
-
+# Recommends movies based on user's genre preferences
 @recommendations_bp.route('/recommendations/genre', methods=['GET'])
 @jwt_required()
 def get_genre_recommendations():
-    """
-    Example endpoint for Genre Similarity Recommendations
-    """
     user_id = get_jwt_identity()
     reviews_df, genres_df = fetch_reviews_and_genres()
 
-    recommended_ids = genre_similarity(user_id, reviews_df, genres_df, top_n=5)
-
+    recommended_ids = genre_similarity(user_id, reviews_df, genres_df, top_n=7)
+    recommended_movies = fetch_relevant_movie_data(recommended_ids)
+    print(recommended_movies)
+    
     return jsonify({
         "user_id": user_id,
-        "recommendations": recommended_ids
+        "recommendations": recommended_movies
     }), 200

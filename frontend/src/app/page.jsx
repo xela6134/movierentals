@@ -15,7 +15,20 @@ export default function Root() {
   }, [auth.loading, auth.isAuthenticated]);
 
   const fetchData = async () => {
-    
+    const userResponse = await axios.get(`/api/recommendations/user-cf`, {
+      withCredentials: true
+    });
+    console.log(userResponse.data);
+
+    const movieResponse = await axios.get(`/api/recommendations/movie-cf`, {
+      withCredentials: true
+    });
+    console.log(movieResponse.data);
+
+    const genreResponse = await axios.get(`/api/recommendations/genre`, {
+      withCredentials: true
+    });
+    console.log(genreResponse.data);
   };
 
   return (
