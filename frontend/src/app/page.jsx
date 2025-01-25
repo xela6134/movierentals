@@ -50,31 +50,42 @@ export default function Root() {
     <div className="p-8 border-2 border-white rounded-lg">
       <p className="text-2xl mb-4">{title}:</p>
       <div className="w-full flex gap-8 overflow-auto custom-scrollbar">
-        {recommendations.map((movie) => {
-          const movieTitle = movie[1];
-          const movieUrl = movie[2];
-
-          return (
-            <div key={movie[0]} className="flex-shrink-0 w-80">
-              {movieUrl ? (
-                <img
-                  src={movieUrl}
-                  alt={`${movieTitle} Poster`}
-                  className="w-full object-cover rounded"
-                />
-              ) : (
-                <img
-                  src="/images/default_movie.jpg"
-                  alt="No Image Available"
-                  className="w-full object-cover rounded opacity-50"
-                />
-              )}
-              <div className="flex w-full justify-center items-center text-xl font-kanit p-2">
-                {movieTitle.length > 30 ? movieTitle.substring(0, 27) + "..." : movieTitle}
-              </div>
-            </div>
-          );
-        })}
+        {recommendations && recommendations.length > 0 ? (
+          recommendations.map((movie, index) => {
+            if (Array.isArray(movie) && movie.length >= 3) {
+              const movieTitle = movie[1];
+              const movieUrl = movie[2];
+  
+              return (
+                <div key={movie[0] || index} className="flex-shrink-0 w-80">
+                  {movieUrl ? (
+                    <img
+                      src={movieUrl}
+                      alt={`${movieTitle} Poster`}
+                      className="w-full object-cover rounded"
+                    />
+                  ) : (
+                    <img
+                      src="/images/default_movie.jpg"
+                      alt="No Image Available"
+                      className="w-full object-cover rounded opacity-50"
+                    />
+                  )}
+                  <div className="flex w-full justify-center items-center text-xl font-kanit p-2">
+                    {movieTitle && movieTitle.length > 30
+                      ? movieTitle.substring(0, 27) + "..."
+                      : movieTitle || "Untitled"}
+                  </div>
+                </div>
+              );
+            } else {
+              console.error("Unexpected movie structure:", movie);
+              return null;
+            }
+          })
+        ) : (
+          <p>No recommendations available.</p>
+        )}
       </div>
     </div>
   );
