@@ -173,7 +173,7 @@ export default function User() {
                 </div>
                 <div className="w-1/2 p-4 text-white text-xl flex flex-col gap-6">
                   <p>
-                    <strong>ID:</strong> {userInfo.id}
+                    <strong>ID:</strong> {userInfo.user_id}
                   </p>
                   <p>
                     <strong>Name:</strong> {userInfo.name}
