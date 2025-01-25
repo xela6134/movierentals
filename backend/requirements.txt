@@ -8,3 +8,4 @@ itsdangerous==2.2.0
 click==8.1.7
 mysql-connector-python==9.1.0
 python-dotenv==1.0.1
+pandas==2.2.3
