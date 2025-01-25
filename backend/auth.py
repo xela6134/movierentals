@@ -101,8 +101,7 @@ def login():
             return jsonify({"msg": "Invalid user ID or password."}), 401
 
         # Create JWT
-        access_token = create_access_token(identity=user['id'])
-
+        access_token = create_access_token(identity=str(user['id']))
         response = jsonify({"msg": "Login successful."})
         set_access_cookies(response, access_token)
 
