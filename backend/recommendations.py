@@ -289,7 +289,7 @@ def composite_ratings(df: pd.DataFrame, top_n=5):
 @jwt_required()
 def get_user_based_cf():
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         reviews_df, _ = fetch_reviews_and_genres()
 
         recommended_ids = user_based_cf(user_id, reviews_df, top_n=7)
@@ -308,7 +308,7 @@ def get_user_based_cf():
 @jwt_required()
 def get_item_based_cf():
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         reviews_df, _ = fetch_reviews_and_genres()
 
         recommended_ids = item_based_cf(user_id, reviews_df, top_n=7)
@@ -327,7 +327,7 @@ def get_item_based_cf():
 @jwt_required()
 def get_genre_recommendations():
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         reviews_df, genres_df = fetch_reviews_and_genres()
 
         recommended_ids = genre_similarity(user_id, reviews_df, genres_df, top_n=7)
@@ -346,7 +346,7 @@ def get_genre_recommendations():
 @jwt_required()
 def get_composite_recommendations():
     try:
-        user_id = get_jwt_identity()
+        user_id = int(get_jwt_identity())
         df = fetch_aggregates()
 
         recommended_ids = composite_ratings(df, top_n=7)

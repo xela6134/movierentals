@@ -65,7 +65,7 @@ def get_current_reservations():
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
         
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
 
         query = "select r.m_id, r.u_id, m.title from reservations r join movies m on r.m_id = m.id where r.u_id = %s"
 
@@ -126,7 +126,7 @@ def get_reservations_by_user(id):
 def check_valid_reservation():
     try:
         movie_id = request.args.get('movie_id', type=int)
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -150,7 +150,7 @@ def borrow():
     try:
         data = request.get_json()
         movie_id = data.get('movie_id')
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         
         conn = get_db_connection()
         cursor = conn.cursor()
@@ -206,7 +206,7 @@ def return_dvd():
         movie_id = data.get('movie_id')
         rating = data.get('rating')
         review = data.get('review')
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         
         conn = get_db_connection()
         cursor = conn.cursor()

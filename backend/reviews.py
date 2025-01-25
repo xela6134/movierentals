@@ -84,7 +84,7 @@ def get_reviews_by_user(id):
 def get_specific_review():
     try:
         movie_id = request.args.get('movie_id', type=int)
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -125,7 +125,7 @@ def get_specific_review():
 @jwt_required()
 def get_current_user_reviews():
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)

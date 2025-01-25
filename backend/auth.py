@@ -117,7 +117,7 @@ def login():
 @auth_bp.route('/auth/status', methods=['GET'])
 @jwt_required()
 def auth_status():
-    current_user_id = get_jwt_identity()
+    current_user_id = int(get_jwt_identity())
     try:
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -141,7 +141,7 @@ def auth_status():
 def validate():
     try:
         password = request.args.get('password', type=str)
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
 
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -179,7 +179,7 @@ def update():
         if not any([name, age, password]):
             return jsonify({"msg": "At least one field (name, age, password) must be provided."}), 400
 
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
 
         cursor.execute("select * from users where id = %s", (current_user_id,))
         user = cursor.fetchone()
