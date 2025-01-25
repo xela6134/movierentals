@@ -345,17 +345,17 @@ def get_genre_recommendations():
 @recommendations_bp.route('/recommendations/composite', methods=['GET'])
 @jwt_required()
 def get_composite_recommendations():
-    """
-    Endpoint for Composite Score Recommendations
-    Combines average rating and rental count to rank movies.
-    """
-    user_id = get_jwt_identity()
-    df = fetch_aggregates()
+    try:
+        user_id = get_jwt_identity()
+        df = fetch_aggregates()
 
-    recommended_ids = composite_ratings(df, top_n=7)
-    recommended_movies = fetch_relevant_movie_data(recommended_ids)
-    
-    return jsonify({
-        "user_id": user_id,
-        "recommendations": recommended_movies
-    }), 200
+        recommended_ids = composite_ratings(df, top_n=7)
+        recommended_movies = fetch_relevant_movie_data(recommended_ids)
+        
+        return jsonify({
+            "user_id": user_id,
+            "recommendations": recommended_movies
+        }), 200
+    except Exception as e:
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": f"Internal server error. {e}"}), 500

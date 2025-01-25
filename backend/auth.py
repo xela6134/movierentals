@@ -110,7 +110,7 @@ def login():
     except Exception as e:
         print(f"Exception: {e}")
         conn.rollback()
-        return jsonify({"msg": "Internal server error."}), 500
+        return jsonify({"msg": f"Internal server error. {e}"}), 500
     finally:
         cursor.close()
         conn.close()
