@@ -22,13 +22,20 @@ app.config['JWT_ACCESS_TOKEN_EXPIRES'] = int(os.getenv('JWT_ACCESS_TOKEN_EXPIRES
 
 app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_ACCESS_COOKIE_NAME'] = 'access_token_cookie'
-app.config['JWT_COOKIE_SECURE'] = False     # dev only
-app.config['JWT_COOKIE_SAMESITE'] = 'Lax'   # dev only
+# app.config['JWT_COOKIE_SECURE'] = False       # dev only
+# app.config['JWT_COOKIE_SAMESITE'] = 'Lax'     # dev only
+app.config['JWT_COOKIE_SECURE'] = True          # prod only
+app.config['JWT_COOKIE_SAMESITE'] = "None"      # prod only
 app.config['JWT_ACCESS_COOKIE_PATH'] = '/'
 app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 
 # TODO: Change origin on frontend deploy
 CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
+
+CORS(app, origins=[
+    "http://localhost:3000",
+    "https://movierentals-production-fa0b.up.railway.app",
+], supports_credentials=True)
 
 app.register_blueprint(auth_bp)
 app.register_blueprint(movies_bp)
