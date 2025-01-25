@@ -24,27 +24,55 @@ config = {
 def get_db_connection():
     return mysql.connector.connect(**config)
 
+# left join used just in case there are movies without reviews (later on)
+select_query = """
+select m.id as m_id, avg(r.rating) as avg, count(r.u_id) as count
+from movies m
+left join reviews r on m.id = r.m_id
+group by m.id;
+"""
+
 # ---------------------- #
 #     HELPER METHODS     #
 # ---------------------- #
 
 def fetch_reviews_and_genres():
     conn = get_db_connection()
-    cursor = conn.cursor()
+    cursor = conn.cursor(dictionary=True)
 
     cursor.execute("select m_id, u_id, rating from reviews")
     reviews_data = cursor.fetchall()
     cursor.execute("select id as m_id, genre from genres")
     genres_data = cursor.fetchall()
 
-    reviews_df = pd.DataFrame(reviews_data, columns=["m_id", "u_id", "rating"])
-    genres_df = pd.DataFrame(genres_data, columns=["m_id", "genre"])
+    reviews_df = pd.DataFrame(reviews_data)
+    genres_df = pd.DataFrame(genres_data)
 
     cursor.close()
     conn.close()
 
     return reviews_df, genres_df
 
+def fetch_aggregates():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)
+    
+    sql_query = """
+    select m.id as m_id, avg(r.rating) as avg_rating, count(r.u_id) as rental_count
+    from movies m
+    join reviews r on m.id = r.m_id
+    group by m.id;
+    """
+    
+    cursor.execute(sql_query)
+    data = cursor.fetchall()
+    df = pd.DataFrame(data)
+    
+    cursor.close()
+    conn.close()
+    
+    return df
+    
 def fetch_relevant_movie_data(recommended_ids):
     if not recommended_ids:
         return [], []
@@ -178,7 +206,7 @@ def item_based_cf(user_id, reviews_df, top_n=5):
     return recommended_movie_ids
 
 # Recommends movies with the highest genre affinity scores that the user hasn't rated
-def genre_similarity(user_id, reviews_df, genres_df, top_n=5):
+def genre_similarity(user_id, reviews_df: pd.DataFrame, genres_df: pd.DataFrame, top_n=5):
     """
     Genre Similarity:
     1. Identify user's preferred genres (based on highly rated movies)
@@ -227,6 +255,33 @@ def genre_similarity(user_id, reviews_df, genres_df, top_n=5):
     recommended_movie_ids = to_recommend.index.tolist()
     return recommended_movie_ids
 
+# Composite Score = 0.5 * (Normalised Rating) + 0.5 * (Normalised Rental Count)
+def composite_ratings(df: pd.DataFrame, top_n=5):
+    # Null handling from left join
+    df['avg_rating'] = df['avg_rating'].fillna(0)
+    df['rental_count'] = df['rental_count'].fillna(0)
+    
+    df['avg_rating'] = df['avg_rating'].astype(float)
+    df['rental_count'] = df['rental_count'].astype(float)
+
+    # Normalisation Process
+    if df['avg_rating'].max() != df['avg_rating'].min():
+        df['rating_score'] = (df['avg_rating'] - df['avg_rating'].min()) / (df['avg_rating'].max() - df['avg_rating'].min())
+    else:
+        df['rating_score'] = 0.0
+    
+    if df['rental_count'].max() != df['rental_count'].min():
+        df['rental_score'] = (df['rental_count'] - df['rental_count'].min()) / (df['rental_count'].max() - df['rental_count'].min())
+    else:
+        df['rental_score'] = 0.0
+    
+    df['composite_score'] = 0.5 * df['rating_score'] + 0.5 * df['rental_score']
+    
+    recommendations = df.sort_values(by='composite_score', ascending=False).head(top_n)
+    recommended_movie_ids = recommendations['m_id'].tolist()
+
+    return recommended_movie_ids
+
 ############
 ## Routes ##
 ############
@@ -235,44 +290,72 @@ def genre_similarity(user_id, reviews_df, genres_df, top_n=5):
 @recommendations_bp.route('/recommendations/user-cf', methods=['GET'])
 @jwt_required()
 def get_user_based_cf():
-    user_id = get_jwt_identity()
-    reviews_df, _ = fetch_reviews_and_genres()
+    try:
+        user_id = get_jwt_identity()
+        reviews_df, _ = fetch_reviews_and_genres()
 
-    recommended_ids = user_based_cf(user_id, reviews_df, top_n=7)    
-    recommended_movies = fetch_relevant_movie_data(recommended_ids)
-    print(recommended_movies)
+        recommended_ids = user_based_cf(user_id, reviews_df, top_n=7)    
+        recommended_movies = fetch_relevant_movie_data(recommended_ids)
 
-    return jsonify({
-        "user_id": user_id,
-        "recommendations": recommended_movies
-    }), 200
+        return jsonify({
+            "user_id": user_id,
+            "recommendations": recommended_movies
+        }), 200
+    except Exception as e:
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal Server Error"}), 500
 
 # Recommends movies based on user's current preference (rating >= 4)
 @recommendations_bp.route('/recommendations/movie-cf', methods=['GET'])
 @jwt_required()
 def get_item_based_cf():
-    user_id = get_jwt_identity()
-    reviews_df, _ = fetch_reviews_and_genres()
+    try:
+        user_id = get_jwt_identity()
+        reviews_df, _ = fetch_reviews_and_genres()
 
-    recommended_ids = item_based_cf(user_id, reviews_df, top_n=7)
-    recommended_movies = fetch_relevant_movie_data(recommended_ids)
-    print(recommended_movies)
+        recommended_ids = item_based_cf(user_id, reviews_df, top_n=7)
+        recommended_movies = fetch_relevant_movie_data(recommended_ids)
 
-    return jsonify({
-        "user_id": user_id,
-        "recommendations": recommended_movies
-    }), 200
+        return jsonify({
+            "user_id": user_id,
+            "recommendations": recommended_movies
+        }), 200
+    except Exception as e:
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal server error"}), 500
 
 # Recommends movies based on user's genre preferences
 @recommendations_bp.route('/recommendations/genre', methods=['GET'])
 @jwt_required()
 def get_genre_recommendations():
-    user_id = get_jwt_identity()
-    reviews_df, genres_df = fetch_reviews_and_genres()
+    try:
+        user_id = get_jwt_identity()
+        reviews_df, genres_df = fetch_reviews_and_genres()
 
-    recommended_ids = genre_similarity(user_id, reviews_df, genres_df, top_n=7)
+        recommended_ids = genre_similarity(user_id, reviews_df, genres_df, top_n=7)
+        recommended_movies = fetch_relevant_movie_data(recommended_ids)
+        
+        return jsonify({
+            "user_id": user_id,
+            "recommendations": recommended_movies
+        }), 200
+    except Exception as e:
+        print(f"Exception caught: {e}")
+        return jsonify({"msg": "Internal server error"}), 500
+
+# Combines average rating & rental count to rank movies
+@recommendations_bp.route('/recommendations/composite', methods=['GET'])
+@jwt_required()
+def get_composite_recommendations():
+    """
+    Endpoint for Composite Score Recommendations
+    Combines average rating and rental count to rank movies.
+    """
+    user_id = get_jwt_identity()
+    df = fetch_aggregates()
+
+    recommended_ids = composite_ratings(df, top_n=7)
     recommended_movies = fetch_relevant_movie_data(recommended_ids)
-    print(recommended_movies)
     
     return jsonify({
         "user_id": user_id,
