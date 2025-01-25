@@ -36,6 +36,11 @@ body::-webkit-scrollbar-thumb:hover {
   background-color: #7f1d1d;
 }
 
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #a92121 #000000;
+}
+
 /* Fonts */
 .font-bebas {
   font-family: 'Bebas Neue', cursive;
