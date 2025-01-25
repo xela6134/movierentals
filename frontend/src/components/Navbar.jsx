@@ -21,7 +21,7 @@ export default function NavBar() {
           user: null,
           loading: false,
         });
-        router.push('/'); // Navigate to homepage after logging out
+        router.push('/');
       })
       .catch((error) => {
         console.error('Logout error:', error.response);
@@ -38,7 +38,9 @@ export default function NavBar() {
         <Link href="/" className="text-white hover:text-red-600">
           Home
         </Link>
-
+        <Link href="/about" className="text-white hover:text-red-600">
+          About
+        </Link>
         {!auth.loading && !auth.isAuthenticated && (
           <>
             <Link href="/login" className="text-white hover:text-red-600">
@@ -49,7 +51,6 @@ export default function NavBar() {
             </Link>
           </>
         )}
-
         {!auth.loading && auth.isAuthenticated && (
           <>
             <Link href="/movies" className="text-white hover:text-red-600">
