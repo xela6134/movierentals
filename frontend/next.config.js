@@ -4,7 +4,7 @@ const nextConfig = {
     return [
       {
         source: '/api/:path*',                        // Match /api/... in browser
-        destination: 'http://localhost:5000/:path*',  // Proxy to Flask
+        destination: 'http://localhost:8000/:path*',  // Proxy to Flask
       },
     ];
   },

@@ -27,7 +27,7 @@ app.config['JWT_COOKIE_SAMESITE'] = 'Lax'   # dev only
 app.config['JWT_ACCESS_COOKIE_PATH'] = '/'
 app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 
-# TODO: Change origin on deploy
+# TODO: Change origin on frontend deploy
 CORS(app, origins=["http://localhost:3000"], supports_credentials=True)
 
 app.register_blueprint(auth_bp)
@@ -38,4 +38,4 @@ app.register_blueprint(reservations_bp)
 app.register_blueprint(recommendations_bp)
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host='0.0.0.0', port=int(os.environ.get('PORT', 8000)))
