@@ -66,7 +66,7 @@ def get_user_by_id(id):
 @jwt_required()
 def get_username():
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
 
         conn = get_db_connection()
         cursor = conn.cursor(dictionary=True)
@@ -87,7 +87,7 @@ def get_username():
 @jwt_required()
 def get_userid():
     try:
-        current_user_id = get_jwt_identity()
+        current_user_id = int(get_jwt_identity())
         
         if not current_user_id:
             return jsonify({"msg": "User not found."}), 404

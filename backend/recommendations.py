@@ -292,7 +292,7 @@ def get_user_based_cf():
         user_id = get_jwt_identity()
         reviews_df, _ = fetch_reviews_and_genres()
 
-        recommended_ids = user_based_cf(user_id, reviews_df, top_n=7)    
+        recommended_ids = user_based_cf(user_id, reviews_df, top_n=7)
         recommended_movies = fetch_relevant_movie_data(recommended_ids)
 
         return jsonify({
