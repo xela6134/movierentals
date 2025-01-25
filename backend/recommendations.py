@@ -73,7 +73,7 @@ def fetch_aggregates():
     
 def fetch_relevant_movie_data(recommended_ids):
     if not recommended_ids:
-        return [], []
+        return []
 
     conn = get_db_connection()
     cursor = conn.cursor()
