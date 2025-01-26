@@ -1,5 +1,8 @@
 # Fullstack Movie DVD Rental System
 
+## URL
+- https://movierentals-production-fa0b.up.railway.app/
+
 ## Overview
 
 This project is a fullstack movie rental system designed to allow users to sign up/log in, borrow movie DVDs, return them, write reviews, and receive movie recommendations based on their preferences and current popularity.
