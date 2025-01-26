@@ -3,6 +3,7 @@
 
 import React, { useContext, useEffect, useState } from 'react';
 import { AuthContext } from '@/components/AuthContext';
+import Link from 'next/link';
 import axios from 'axios';
 
 export default function Root() {
@@ -53,33 +54,57 @@ export default function Root() {
         {recommendations && recommendations.length > 0 ? (
           recommendations.map((movie, index) => {
             if (Array.isArray(movie) && movie.length >= 3) {
+              const movieId = movie[0];
               const movieTitle = movie[1];
               const movieUrl = movie[2];
-  
+
               return (
-                <div key={movie[0] || index} className="flex-shrink-0 w-80">
-                  {movieUrl ? (
-                    <img
-                      src={movieUrl}
-                      alt={`${movieTitle} Poster`}
-                      className="w-full object-cover rounded"
-                    />
+                <div key={movieId || index} className="flex-shrink-0 w-80">
+                  {movieId ? (
+                    <Link
+                      href={`/movies/${movieId}`}
+                      className="block cursor-pointer hover:opacity-75 transition-opacity duration-200"
+                    >
+                      {movieUrl ? (
+                        <img
+                          src={movieUrl}
+                          alt={`${movieTitle} Poster`}
+                          className="w-full object-cover rounded"
+                        />
+                      ) : (
+                        <img
+                          src="/images/default_movie.jpg"
+                          alt="No Image Available"
+                          className="w-full object-cover rounded opacity-50"
+                        />
+                      )}
+                    </Link>
                   ) : (
-                    <img
-                      src="/images/default_movie.jpg"
-                      alt="No Image Available"
-                      className="w-full object-cover rounded opacity-50"
-                    />
+                    <div className="w-full object-cover rounded opacity-50">
+                      {movieUrl ? (
+                        <img
+                          src={movieUrl}
+                          alt={`${movieTitle} Poster`}
+                          className="w-full object-cover rounded"
+                        />
+                      ) : (
+                        <img
+                          src="/images/default_movie.jpg"
+                          alt="No Image Available"
+                          className="w-full object-cover rounded opacity-50"
+                        />
+                      )}
+                    </div>
                   )}
                   <div className="flex w-full justify-center items-center text-xl font-kanit p-2">
                     {movieTitle && movieTitle.length > 30
-                      ? movieTitle.substring(0, 27) + "..."
-                      : movieTitle || "Untitled"}
+                      ? `${movieTitle.substring(0, 27)}...`
+                      : movieTitle || 'Untitled'}
                   </div>
                 </div>
               );
             } else {
-              console.error("Unexpected movie structure:", movie);
+              console.error('Unexpected movie structure:', movie);
               return null;
             }
           })
