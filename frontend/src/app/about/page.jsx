@@ -13,8 +13,6 @@ export default function About() {
     if (!auth.loading) {
       if (!auth.isAuthenticated) {
         setLoggedIn(false);
-      } else {
-        fetchData(true);
       }
     }
   }, [auth.loading, auth.isAuthenticated]);
